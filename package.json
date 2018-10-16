@@ -17,7 +17,8 @@
     "material-design-icons-iconfont": "^3.0.3",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
-    "vuetify": "^1.2.9"
+    "vuetify": "^1.2.9",
+    "bismuth-js-sdk": "git+ssh://git@github.com:gabidi/bismuth-js-sdk.git#0.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

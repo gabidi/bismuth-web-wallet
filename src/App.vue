@@ -11,7 +11,7 @@
                     app
             >
                 <v-list dense>
-                    <v-list-tile v-for="item in items" :key="item.text" :to="item.link">
+                    <v-list-tile v-for="item in items" :key="item.text"  @click="" :to="item.link">
                             <v-list-tile-action>
                                 <v-icon>{{ item.icon }}</v-icon>
                             </v-list-tile-action>
@@ -45,7 +45,7 @@
                 </v-list>
             </v-navigation-drawer>
             <v-toolbar
-                    color="red"
+                    color="purple"
                     dense
                     fixed
                     clipped-left
@@ -75,24 +75,24 @@
 </template>
 
 <script>
-  export default {
-    name: 'App',
-    data: () => ({
-      drawer: true,
-      items: [
-        {icon: 'subscriptions', text: 'Address', link: 'address'},
-        {icon: 'history', text: 'Transaction History'},
-      ],
-      addressBook: [
-        {picture: 28, text: 'John'},
-        {picture: 38, text: 'Sarah'},
-        {picture: 78, text: 'Kim'}
-      ]
-    }),
-    props: {
-      source: String
-    }
+export default {
+  name: 'App',
+  data: () => ({
+    drawer: true,
+    items: [
+      {icon: 'subscriptions', text: 'Address', link: 'address'},
+      {icon: 'history', text: 'Transaction History'}
+    ],
+    addressBook: [
+      {picture: 28, text: 'John'},
+      {picture: 38, text: 'Sarah'},
+      {picture: 78, text: 'Kim'}
+    ]
+  }),
+  props: {
+    source: String
   }
+}
 
 </script>
 
