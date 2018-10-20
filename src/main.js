@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import sdk from './models/bismuthSdk'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css' // Ensure you are using css-loader
@@ -14,7 +15,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  sdk: sdk({server: '127.0.0.1', port: 8155}),
   components: { App },
   template: '<App/>'
 })
-
