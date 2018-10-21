@@ -17,6 +17,7 @@
                   class="mx-0"
                   color="primary"
                   large
+                  disabled="true"
           >
             Send BIS
           </v-btn>
@@ -24,6 +25,7 @@
                   class="mx-0"
                   color="primary"
                   large
+                  disabled="true"
           >
             Check Txn
           </v-btn>
