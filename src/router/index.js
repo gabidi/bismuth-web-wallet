@@ -8,13 +8,19 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path :'/',
-      name : Landing,
-      component: Landing,
+      path: '/',
+      name: Landing,
+      component: Landing
     },
     {
-      path: '/address',
+      path: '/address/:addressId?',
       name: 'Address',
+      props: (route) => {
+        return {
+          autoFetch: !!route.query.autoFetch,
+          addressId: route.params.addressId
+        }
+      },
       component: Address
     }
   ]

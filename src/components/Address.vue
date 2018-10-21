@@ -135,14 +135,15 @@
               { text: 'Recipient' , value: 'recipient'},
               { text: 'Amount' , value: 'amount'},
               { text: 'Fee' , value: 'fee'},
-              { text: 'Actions' , value: 'actions', sortable: false, align: center},
+              { text: 'Actions' , value: 'actions', sortable: false, align: 'center'},
 
            /*   { text: 'reward' , value: 'reward'},
               { text: 'operation' , value: 'operation'},*/
             ]"
-                                :items="addressTxnList"
-                                hide-actions
+                                :items="addressTxnListToDisplay"
                                 item-key="blockHeight"
+                                :pagination="{sortBy: 'blockHeight',descending : true, rowsPerPage: -1}"
+                                hide-actions
                         >
                             <template slot="items" slot-scope="props">
                                 <tr @click="props.expanded = !props.expanded">
@@ -169,10 +170,12 @@
                                                 <v-list-tile>
                                                     <v-list-tile-title>Transaction Details</v-list-tile-title>
                                                 </v-list-tile>
-                                                <v-list-tile>
-                                                    <v-list-tile-title>Goto Origin</v-list-tile-title>
+                                                <v-list-tile  :to="{ path: `${props.item.address}?autoFetch=true`}">
+                                                    <v-list-tile-title>
+                                                        Goto Origin
+                                                    </v-list-tile-title>
                                                 </v-list-tile>
-                                                <v-list-tile>
+                                                <v-list-tile :to="{ path: `${props.item.recipient}?autoFetch=true`}">
                                                     <v-list-tile-title>Goto Recepient</v-list-tile-title>
                                                 </v-list-tile>
                                             </v-list>
@@ -182,6 +185,36 @@
                                     <!--                  <td class="text-xs-right">{{ props.item.reward }}</td>
                                                       <td class="text-xs-right">{{ props.item.operation }}</td>-->
                                 </tr>
+                            </template>
+                            <template slot="footer">
+                                <td>
+                                    Filters and Limits
+                                </td>
+                                <td>
+                                    <v-overflow-btn
+                                            :items="[
+                                               { text: 10},
+                                               { text: 20},
+                                               {text :50},
+                                               {text:100}
+                                            ]"
+                                            v-model="txnListLimit"
+                                            label="Show last Limit"
+                                            editable
+                                            item-value="text"
+                                    ></v-overflow-btn>
+                                </td>
+                                <td>
+                                    <v-checkbox v-model="txnListFilters" color="success" label="Incoming" value='{"type": "direction" , "value": "incoming"}'></v-checkbox>
+                                    <v-checkbox v-model="txnListFilters" color="red" label="Outgoing" value='{"type": "direction" , "value": "outgoing"}'></v-checkbox>
+
+                                </Td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
                             </template>
                             <!--<template slot="expand" slot-scope="props">
                                 <v-card flat>
@@ -216,15 +249,20 @@
 </template>
 
 <script>
-  import TimeAgo from 'javascript-time-ago'
-  import en from 'javascript-time-ago/locale/en'
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
 
-  TimeAgo.locale(en)
-  const timeAgo = new TimeAgo('en-US')
-  export default {
-    name: 'Address',
-    data: () => ({
-      address: null,
+TimeAgo.locale(en)
+const timeAgo = new TimeAgo('en-US')
+export default {
+  name: 'Address',
+  props: ['addressId', 'autoFetch'],
+  async mounted () {
+    if (this.autoFetch && this.addressIsValid) { await this.getAdddresAndTxns() }
+  },
+  data () {
+    return {
+      address: this.addressId || null,
       isLoading: false,
       rules: {
         length: len => v => (v || '').length === len || `Invalid character length, required ${len}`,
@@ -244,71 +282,107 @@
         show: true
       },
       txnListLimit: 10,
+      txnListFilters: ['{"type": "direction" , "value": "incoming"}','{"type": "direction" , "value": "outgoing"}'],
       addressTxnList: []
-    }),
-    computed: {
-      addressIsValid () {
-        return this.address && (this.rules.address(this.address).length === 1)
+    }
+  },
+  computed: {
+    addressIsValid () {
+      return this.address && (this.rules.address(this.address).length === 1)
+    },
+    addressTxnListToDisplay () {
+      let txnsToShow = this.addressTxnList
+
+      if (this.txnListFilters.length) {
+        const filters = this.txnListFilters.map(JSON.parse)
+        txnsToShow = txnsToShow.filter(t =>
+          // Using some for 'OR'
+          filters.some(({type, value}) =>
+            t[type] === value
+          )
+
+        )
+      }
+      return txnsToShow
+    }
+
+  },
+  watch: {
+    addressId: {
+      async handler (n, o) {
+        if (this.autoFetch && n !== o) {
+          console.log('add', n, o)
+
+          this.address = n
+          await this.getAdddresAndTxns()
+        }
       }
     },
-    methods: {
-      reset () {
-        // FIXME Remove this before production
-        this.address = 'd2f59465568c120a9203f9bd6ba2169b21478f4e7cb713f61eaa1ea0'
-        this.addressTxnList = []
-        this.addressBalance = {
-          balance: null,
-          totalDebits: null,
-          totalCredits: null,
-          totalFees: null,
-          totalRewards: null,
-          balanceNotInMempool: null
+    txnListLimit: {
+      async handler (n, o) {
+        if (n !== o) {
+          await this.getAddressTxns()
         }
-      },
-      async getAddress () {
-        this.isLoading = true
-        const [balance, totalCredits, totalDebits, totalFees, totalRewards, balanceNotInMempool] =
+      }
+    }
+  },
+  methods: {
+    reset () {
+      // FIXME Remove this before production
+      this.addressTxnList = []
+      this.addressBalance = {
+        balance: null,
+        totalDebits: null,
+        totalCredits: null,
+        totalFees: null,
+        totalRewards: null,
+        balanceNotInMempool: null
+      }
+    },
+    async getAddress () {
+      this.isLoading = true
+      const [balance, totalCredits, totalDebits, totalFees, totalRewards, balanceNotInMempool] =
           (await (
             await this.$sdk
           ).getAddressBalance(this.address)).map(parseFloat)
-        this.isLoading = false
-        this.addressBalance.balance = balance
-        this.addressBalance.totalDebits = totalDebits
-        this.addressBalance.totalCredits = totalCredits
-        this.addressBalance.totalFees = totalFees
-        this.addressBalance.totalRewards = totalRewards
-        this.addressBalance.balanceNotInMempool = balanceNotInMempool
-      },
-      async getAddressTxns () {
-        this.isLoading = true
-        const addressTxnList = await (await this.$sdk).getAddressTxnList(this.address, this.txnListLimit)
-        this.isLoading = false
-        if (addressTxnList.length) {
-          this.addressTxnList = addressTxnList.map(([blockHeight, timestamp, address, recipient, amount, signature, publicKey, blockHash, fee, reward, operation, openField]) => ({
-            blockHeight,
-            timestamp,
-            address,
-            recipient,
-            amount,
-            signature,
-            publicKey,
-            blockHash,
-            fee,
-            reward,
-            operation,
-            openField,
-            relativeTime: timeAgo.format(parseFloat(timestamp) * 1000, 'twitter'),
-            direction: (recipient === this.address) ? 'incoming' : 'outgoing'
-          }))
-        }
-      },
-      async getAdddresAndTxns () {
-        // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
-        await this.getAddress()
-        await this.getAddressTxns()
+      this.isLoading = false
+      this.addressBalance.balance = balance
+      this.addressBalance.totalDebits = totalDebits
+      this.addressBalance.totalCredits = totalCredits
+      this.addressBalance.totalFees = totalFees
+      this.addressBalance.totalRewards = totalRewards
+      this.addressBalance.balanceNotInMempool = balanceNotInMempool
+    },
+    async getAddressTxns () {
+      this.isLoading = true
+      const addressTxnList = await (await this.$sdk).getAddressTxnList(this.address, this.txnListLimit)
+      this.isLoading = false
+      if (addressTxnList.length) {
+        this.addressTxnList = addressTxnList.map(([blockHeight, timestamp, address, recipient, amount, signature, publicKey, blockHash, fee, reward, operation, openField]) => ({
+          blockHeight,
+          timestamp,
+          address,
+          recipient,
+          amount,
+          signature,
+          publicKey,
+          blockHash,
+          fee,
+          reward,
+          operation,
+          openField,
+          relativeTime: timeAgo.format(parseFloat(timestamp) * 1000, 'twitter'),
+          direction: (recipient === this.address) ? 'incoming' : 'outgoing'
+        }))
       }
+    },
+    async getAdddresAndTxns () {
+      // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
+      await this.getAddress()
+      await this.getAddressTxns()
     }
   }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
