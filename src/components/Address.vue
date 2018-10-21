@@ -9,6 +9,7 @@
                                 hide-details
                                 prepend-icon="search"
                                 @click:prepend="getAdddresAndTxns"
+                                @keyup.enter.capture="getAdddresAndTxns"
                                 single-line
                                 v-model="address"
                                 placeholder="Enter a Bismuth address"
@@ -17,10 +18,62 @@
                         <v-spacer></v-spacer>
 
                         <v-toolbar-items v-if="addressBalance.balance">
-                            <v-btn>
-                                <v-icon color="green darken-2">account_balance</v-icon>
+                            <v-btn @click="getAdddresAndTxns">
+                                <v-icon color="deep-purple accent-2">account_balance</v-icon>
                                 {{addressBalance.balance.toFixed(2)}}
                             </v-btn>
+
+                            <v-menu offset-x left bottom>
+                                <v-btn
+                                        icon
+                                        slot="activator">
+                                    <v-icon>settings</v-icon>
+                                </v-btn>
+                                <v-list dense>
+                                    <v-list-tile-title>Show</v-list-tile-title>
+                                    <v-list-tile-action>
+                                        <v-overflow-btn
+                                                :items="[
+                                               { text: 10},
+                                               { text: 20},
+                                               {text :50},
+                                               {text:100}
+                                            ]"
+                                                v-model="txnListLimit"
+                                                label="Show last Limit"
+                                                editable
+                                                item-value="text"
+                                        ></v-overflow-btn>
+                                    </v-list-tile-action>
+                                    <v-divider></v-divider>
+
+                                    <v-list-tile>
+                                        <v-list-tile-title>Incoming</v-list-tile-title>
+                                        <v-list-tile-action>
+
+                                            <v-checkbox v-model="txnListFilters" color="success"
+                                                        value='{"type": "direction" , "value": "incoming"}'></v-checkbox>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                    <v-list-tile>
+
+                                        <v-list-tile-title>Outgoing</v-list-tile-title>
+                                        <v-list-tile-action>
+                                            <v-checkbox v-model="txnListFilters" color="red"
+                                                        value='{"type": "direction" , "value": "outgoing"}'></v-checkbox>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                    <v-list-tile>
+
+                                        <v-list-tile-title>Full Address</v-list-tile-title>
+                                        <v-list-tile-action>
+                                            <v-switch v-model="txnListShowFullAddress"></v-switch>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+
+                                </v-list>
+
+                            </v-menu>
                             <v-spacer></v-spacer>
                             <v-menu offset-x left bottom>
                                 <v-btn
@@ -34,7 +87,7 @@
                                             {{ (addressExtraInfo.show) ? 'Hide' : 'Show'}}
                                         </v-list-tile-title>
                                     </v-list-tile>
-                                    <v-list-tile>
+                                    <v-list-tile @click="reset">
                                         <v-list-tile-title>Clear</v-list-tile-title>
                                     </v-list-tile>
                                     <v-divider></v-divider>
@@ -60,27 +113,27 @@
                     <v-flex id="addressDataTableAddressExtraInfo"
                             v-if="addressIsValid && addressBalance.balance" d-flex xs12>
                         <v-layout row wrap>
-                            <v-flex id="addressExtraInfoBalance" d-flex xs6 md6>
+                            <v-flex id="addressExtraInfoBalance" d-flex xs6 md4>
                                 <v-card>
                                     <v-card-title primary-title>
                                         <div>
-                                            <div class="headline">
-                                                <v-icon color="green">account_balance</v-icon>
+                                            <div class="display-2">
+                                                <v-icon color="deep-purple accent-2" large>account_balance</v-icon>
                                                 {{addressBalance.balance}}
                                             </div>
-                                            <div>Balance</div>
+                                            <div class="headline">Balance</div>
                                         </div>
                                     </v-card-title>
                                 </v-card>
                             </v-flex>
-                            <v-flex id="addressExtraInfoDetails" d-flex xs6 md6>
+                            <v-flex id="addressExtraInfoDetails" d-flex xs6 md6 offset-md2>
                                 <v-layout row wrap>
                                     <v-flex d-flex>
                                         <v-card>
                                             <v-card-title primary-title>
                                                 <div>
                                                     <div class="headline">
-                                                        <v-icon color="green">chevron_right</v-icon>
+                                                        <v-icon color="green" large>chevron_right</v-icon>
                                                         {{addressBalance.totalCredits.toFixed(2)}}
                                                     </div>
                                                     <div>Total Credits</div>
@@ -94,7 +147,7 @@
                                             <v-card-title primary-title>
                                                 <div>
                                                     <div class="headline">
-                                                        <v-icon color="red">chevron_left</v-icon>
+                                                        <v-icon color="red" large>chevron_left</v-icon>
                                                         {{addressBalance.totalDebits.toFixed(2)}}
                                                     </div>
                                                     <div>Total Debits</div>
@@ -115,12 +168,12 @@
                                             </v-card-title>
                                         </v-card>
                                     </v-flex>
-                                    <v-flex d-flex>
+                                    <!--<v-flex d-flex>
                                         <v-card>
                                             {{addressBalance.totalRewards}}
                                             Total Rewards
                                         </v-card>
-                                    </v-flex>
+                                    </v-flex>-->
                                 </v-layout>
                             </v-flex>
                         </v-layout>
@@ -128,9 +181,9 @@
                     <v-flex xs12 id="addressDataTable" v-if="addressTxnList.length">
                         <v-data-table
                                 :headers="[
-              { text: 'Block Height' , value: 'blockHeight'},
-              { text: 'Txn Direction' , value: 'direction'},
-              { text: 'Date' , value: 'timestamp'},
+              { text: 'Block Height' , value: 'blockHeight', align: 'left'},
+              { text: 'Type' , value: 'direction', align: 'center' },
+              { text: 'Date' , value: 'timestamp', align: 'center'},
               { text: 'Origin' , value: 'address'},
               { text: 'Recipient' , value: 'recipient'},
               { text: 'Amount' , value: 'amount'},
@@ -146,16 +199,24 @@
                                 hide-actions
                         >
                             <template slot="items" slot-scope="props">
-                                <tr @click="props.expanded = !props.expanded">
-                                    <td>{{ props.item.blockHeight }}</td>
-                                    <td class="text-xs-right">
+                                <tr>
+                                    <td class="text-xs-center">{{ props.item.blockHeight }}</td>
+                                    <td class="text-xs-center">
                                         <v-icon :color="props.item.direction === 'incoming' ? 'green' : 'red' ">
                                             {{(props.item.direction === 'incoming' ? 'chevron_right': 'chevron_left')}}
                                         </v-icon>
+
+                                        <v-icon v-if="props.item.txnTypeIcon !== 'unknown'" color="blue-grey darken-1">
+                                            {{ props.item.txnTypeIcon}}
+                                        </v-icon>
                                     </td>
                                     <td class="text-xs-right">{{ props.item.relativeTime }}</td>
-                                    <td class="text-xs-right">{{ props.item.address }}</td>
-                                    <td class="text-xs-right">{{ props.item.recipient }}</td>
+                                    <td class="text-xs-right">
+                                        {{ showFullAddress ? props.item.address :   $options.filters.firstLastFour(props.item.address) }}
+                                    </td>
+                                    <td class="text-xs-right">
+                                        {{ showFullAddress ? props.item.recipient : $options.filters.firstLastFour(props.item.recipient) }}
+                                    </td>
                                     <td class="text-xs-right">{{ props.item.amount }}</td>
                                     <td class="text-xs-right">{{ props.item.fee }}</td>
                                     <!-- @todo These functions !-->
@@ -170,7 +231,7 @@
                                                 <v-list-tile>
                                                     <v-list-tile-title>Transaction Details</v-list-tile-title>
                                                 </v-list-tile>
-                                                <v-list-tile  :to="{ path: `${props.item.address}?autoFetch=true`}">
+                                                <v-list-tile :to="{ path: `${props.item.address}?autoFetch=true`}">
                                                     <v-list-tile-title>
                                                         Goto Origin
                                                     </v-list-tile-title>
@@ -185,36 +246,6 @@
                                     <!--                  <td class="text-xs-right">{{ props.item.reward }}</td>
                                                       <td class="text-xs-right">{{ props.item.operation }}</td>-->
                                 </tr>
-                            </template>
-                            <template slot="footer">
-                                <td>
-                                    Filters and Limits
-                                </td>
-                                <td>
-                                    <v-overflow-btn
-                                            :items="[
-                                               { text: 10},
-                                               { text: 20},
-                                               {text :50},
-                                               {text:100}
-                                            ]"
-                                            v-model="txnListLimit"
-                                            label="Show last Limit"
-                                            editable
-                                            item-value="text"
-                                    ></v-overflow-btn>
-                                </td>
-                                <td>
-                                    <v-checkbox v-model="txnListFilters" color="success" label="Incoming" value='{"type": "direction" , "value": "incoming"}'></v-checkbox>
-                                    <v-checkbox v-model="txnListFilters" color="red" label="Outgoing" value='{"type": "direction" , "value": "outgoing"}'></v-checkbox>
-
-                                </Td>
-                                <td>
-
-                                </td>
-                                <td>
-
-                                </td>
                             </template>
                             <!--<template slot="expand" slot-scope="props">
                                 <v-card flat>
@@ -245,6 +276,26 @@
                 </template>
             </v-layout>
         </v-container>
+        <v-dialog
+                v-model="showLoadDialog"
+                hide-overlay
+                persistent
+                width="300"
+        >
+            <v-card
+                    color="primary"
+                    dark
+            >
+                <v-card-text>
+                    Generating...
+                    <v-progress-linear
+                            indeterminate
+                            color="white"
+                            class="mb-0"
+                    ></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -258,7 +309,9 @@ export default {
   name: 'Address',
   props: ['addressId', 'autoFetch'],
   async mounted () {
-    if (this.autoFetch && this.addressIsValid) { await this.getAdddresAndTxns() }
+    if (this.autoFetch && this.addressIsValid) {
+      await this.getAdddresAndTxns()
+    }
   },
   data () {
     return {
@@ -267,7 +320,7 @@ export default {
       rules: {
         length: len => v => (v || '').length === len || `Invalid character length, required ${len}`,
         address: v => (v || '').match(/^[a-f0-9]{56}$/) ||
-          'Bismuth Address should be Alphanumeric and 56 chars long',
+            'Bismuth Address should be Alphanumeric and 56 chars long',
         required: v => !!v || 'This field is required'
       },
       addressBalance: {
@@ -282,11 +335,23 @@ export default {
         show: true
       },
       txnListLimit: 10,
-      txnListFilters: ['{"type": "direction" , "value": "incoming"}','{"type": "direction" , "value": "outgoing"}'],
+      txnListShowFullAddress: true,
+      txnListFilters: ['{"type": "direction" , "value": "incoming"}', '{"type": "direction" , "value": "outgoing"}'],
       addressTxnList: []
     }
   },
+  filters: {
+    firstLastFour (s) {
+      return `${s.slice(0, 4)} ... ${s.slice(-4)}`
+    }
+  },
   computed: {
+    /**
+     * FIXME Quick hack for slot scope  on $parent data for databale
+     */
+    showFullAddress () {
+      return this.txnListShowFullAddress
+    },
     addressIsValid () {
       return this.address && (this.rules.address(this.address).length === 1)
     },
@@ -296,14 +361,16 @@ export default {
       if (this.txnListFilters.length) {
         const filters = this.txnListFilters.map(JSON.parse)
         txnsToShow = txnsToShow.filter(t =>
-          // Using some for 'OR'
+        // Using some for 'OR'
           filters.some(({type, value}) =>
             t[type] === value
           )
-
         )
       }
       return txnsToShow
+    },
+    showLoadDialog () {
+      return this.isLoading
     }
 
   },
@@ -353,27 +420,68 @@ export default {
       this.addressBalance.totalRewards = totalRewards
       this.addressBalance.balanceNotInMempool = balanceNotInMempool
     },
+    /**
+       * @Todo move this to model
+       * @param operation
+       * @param openField
+       */
+    getTxnType ({operation, openField}) {
+      if (openField.indexOf('msg=') === 0) {
+        return 'message'
+      }
+      const type = operation.match(/^([token|hypernode|tx]+){1}:*([a-zA-Z]+)*.*$/)
+      if (type) {
+        const [, txnNameSpace, txnNameSpaceType] = type
+        return txnNameSpace
+      }
+
+      if (!operation || parseInt(operation) === 0) {
+        return 'normal'
+      }
+      console.warn('Got unknown TXN type', {operation, openField, type})
+      return 'unknown'
+    },
+    getTxnTypeIcon (txnType) {
+      console.log(txnType)
+      switch (txnType) {
+        case 'normal':
+          return 'format_bold'
+        case 'token':
+          return 'star_border'
+        case 'message':
+          return 'sms'
+        default:
+          return 'unknown'
+      }
+    },
     async getAddressTxns () {
       this.isLoading = true
       const addressTxnList = await (await this.$sdk).getAddressTxnList(this.address, this.txnListLimit)
       this.isLoading = false
       if (addressTxnList.length) {
-        this.addressTxnList = addressTxnList.map(([blockHeight, timestamp, address, recipient, amount, signature, publicKey, blockHash, fee, reward, operation, openField]) => ({
-          blockHeight,
-          timestamp,
-          address,
-          recipient,
-          amount,
-          signature,
-          publicKey,
-          blockHash,
-          fee,
-          reward,
-          operation,
-          openField,
-          relativeTime: timeAgo.format(parseFloat(timestamp) * 1000, 'twitter'),
-          direction: (recipient === this.address) ? 'incoming' : 'outgoing'
-        }))
+        this.addressTxnList = addressTxnList.map(([blockHeight, timestamp, address, recipient, amount, signature, publicKey, blockHash, fee, reward, operation, openField]) => {
+          const txnType = this.getTxnType({operation, openField})
+
+          return {
+            blockHeight,
+            timestamp,
+            address,
+            recipient,
+            amount,
+            signature,
+            publicKey,
+            blockHash,
+            fee,
+            reward,
+            operation,
+            openField,
+            relativeTime: timeAgo.format(parseFloat(timestamp) * 1000, 'twitter'),
+            direction: (recipient === this.address) ? 'incoming' : 'outgoing',
+            txnType,
+            txnTypeIcon: this.getTxnTypeIcon(txnType)
+          }
+        }
+        )
       }
     },
     async getAdddresAndTxns () {

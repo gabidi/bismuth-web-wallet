@@ -45,7 +45,7 @@
                 </v-list>
             </v-navigation-drawer>
             <v-toolbar
-                    color="purple"
+                    color="blue-grey darken-4"
                     dense
                     fixed
                     clipped-left
@@ -53,19 +53,9 @@
             >
                 <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-toolbar-title class="mr-5 align-center">
-                    <span class="title">Bismuth Online Wallet</span>
+                    <span class="title" color="deep-purple accent-4">Bismuth Apps - Alpha  - DO NOT USE.</span>
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-layout row align-center style="max-width: 650px">
-                    <v-text-field
-                            placeholder="Enter Address or Txn ID"
-                            single-line
-                            append-icon="search"
-                            :append-icon-cb="() => {}"
-                            color="white"
-                            hide-details
-                    ></v-text-field>
-                </v-layout>
             </v-toolbar>
             <v-content>
                 <router-view/>
