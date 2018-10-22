@@ -2,7 +2,7 @@
     <div id="app">
         <v-app
                 dark
-                id="inspire"
+                id="bis_wallet"
         >
             <v-navigation-drawer
                     fixed
@@ -68,7 +68,7 @@
 export default {
   name: 'App',
   data: () => ({
-    drawer: true,
+    drawer: false,
     items: [
       {icon: 'subscriptions', text: 'Address', link: 'address'},
       {icon: 'history', text: 'Transaction History'}
@@ -87,12 +87,11 @@ export default {
 </script>
 
 <style>
-    #app {
+    /*#app {
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
         color: #2c3e50;
-        margin-top: 60px;
-    }
+    }*/
 </style>

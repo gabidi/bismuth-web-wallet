@@ -15,7 +15,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
-  sdk: sdk({server: '127.0.0.1', port: 8155}),
+  sdk: sdk({server: '194.19.235.82', port: 8155}),
   components: { App },
   template: '<App/>'
 })
