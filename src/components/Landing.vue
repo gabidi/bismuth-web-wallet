@@ -17,7 +17,7 @@
                   class="mx-0"
                   color="primary"
                   large
-                  disabled="true"
+                  :disabled="true"
           >
             Send BIS
           </v-btn>
@@ -25,13 +25,13 @@
                   class="mx-0"
                   color="primary"
                   large
-                  disabled="true"
+                  :disabled="true"
           >
             Check Txn
           </v-btn>
 
           <v-divider class="my-3"></v-divider>
-          <span class="subheading"> NodeVersion: {{nodeVersion}} BlockNumber : {{blockHeight}} , MemPool: , Difficulty: {{difficulty}} , Network HashRate : {{networkHashRate}} </span>
+          <span class="subheading" v-if="difficulty"> NodeVersion: {{nodeVersion}} BlockNumber : {{blockHeight}} , MemPool: , Difficulty: {{difficulty}} , Network HashRate : {{networkHashRate}} </span>
 
         </v-flex>
       </v-layout>

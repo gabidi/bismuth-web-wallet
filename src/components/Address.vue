@@ -270,31 +270,31 @@
 </template>
 
 <script>
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
 
-TimeAgo.locale(en);
-const timeAgo = new TimeAgo("en-US");
+TimeAgo.locale(en)
+const timeAgo = new TimeAgo('en-US')
 export default {
-  name: "Address",
-  props: ["addressId", "autoFetch"],
-  async mounted() {
+  name: 'Address',
+  props: ['addressId', 'autoFetch'],
+  async mounted () {
     if (this.autoFetch && this.addressIsValid) {
-      await this.getAdddresAndTxns();
+      await this.getAdddresAndTxns()
     }
   },
-  data() {
+  data () {
     return {
       address: this.addressId || null,
       isLoading: false,
       rules: {
         length: len => v =>
-          (v || "").length === len ||
+          (v || '').length === len ||
           `Invalid character length, required ${len}`,
         address: v =>
-          (v || "").match(/^[a-f0-9]{56}$/) ||
-          "Bismuth Address should be Alphanumeric and 56 chars long",
-        required: v => !!v || "This field is required"
+          (v || '').match(/^[a-f0-9]{56}$/) ||
+          'Bismuth Address should be Alphanumeric and 56 chars long',
+        required: v => !!v || 'This field is required'
       },
       addressBalance: {
         balance: null,
@@ -308,68 +308,67 @@ export default {
         show: true
       },
       txnListLimit: 10,
-      txnListShowFullAddress: true,
+      txnListOffset: 0,
+      txnListShowFullAddress: false,
       txnListFilters: [
         '{"type": "direction" , "value": "incoming"}',
         '{"type": "direction" , "value": "outgoing"}'
       ],
       addressTxnList: []
-    };
+    }
   },
   filters: {
-    firstLastFour(s) {
-      return `${s.slice(0, 4)} ... ${s.slice(-4)}`;
+    firstLastFour (s) {
+      return `${s.slice(0, 4)} ... ${s.slice(-4)}`
     }
   },
   computed: {
     /**
      * FIXME Quick hack for slot scope  on $parent data for databale
      */
-    showFullAddress() {
-      return this.txnListShowFullAddress;
+    showFullAddress () {
+      return this.txnListShowFullAddress
     },
-    addressIsValid() {
-      return this.address && this.rules.address(this.address).length === 1;
+    addressIsValid () {
+      return this.address && this.rules.address(this.address).length === 1
     },
-    addressTxnListToDisplay() {
-      let txnsToShow = this.addressTxnList;
+    addressTxnListToDisplay () {
+      let txnsToShow = this.addressTxnList
 
       if (this.txnListFilters.length) {
-        const filters = this.txnListFilters.map(JSON.parse);
+        const filters = this.txnListFilters.map(JSON.parse)
         txnsToShow = txnsToShow.filter(t =>
           // Using some for 'OR'
           filters.some(({ type, value }) => t[type] === value)
-        );
+        )
       }
-      return txnsToShow;
+      return txnsToShow
     },
-    showLoadDialog() {
-      return this.isLoading;
+    showLoadDialog () {
+      return this.isLoading
     }
   },
   watch: {
     addressId: {
-      async handler(n, o) {
+      async handler (n, o) {
         if (this.autoFetch && n !== o) {
-          console.log("add", n, o);
-
-          this.address = n;
-          await this.getAdddresAndTxns();
+          this.address = n
+          await this.getAdddresAndTxns()
         }
       }
     },
     txnListLimit: {
-      async handler(n, o) {
+      async handler (n, o) {
         if (n !== o) {
-          await this.getAddressTxns();
+          await this.getAddressTxns()
         }
       }
     }
   },
   methods: {
-    reset() {
+    reset () {
       // FIXME Remove this before production
-      this.addressTxnList = [];
+      this.addressTxnList = []
       this.addressBalance = {
         balance: null,
         totalDebits: null,
@@ -377,10 +376,10 @@ export default {
         totalFees: null,
         totalRewards: null,
         balanceNotInMempool: null
-      };
+      }
     },
-    async getAddress() {
-      this.isLoading = true;
+    async getAddress () {
+      this.isLoading = true
       const [
         balance,
         totalCredits,
@@ -390,62 +389,63 @@ export default {
         balanceNotInMempool
       ] = (await (await this.$sdk).getAddressBalance(this.address)).map(
         parseFloat
-      );
-      this.isLoading = false;
-      this.addressBalance.balance = balance;
-      this.addressBalance.totalDebits = totalDebits;
-      this.addressBalance.totalCredits = totalCredits;
-      this.addressBalance.totalFees = totalFees;
-      this.addressBalance.totalRewards = totalRewards;
-      this.addressBalance.balanceNotInMempool = balanceNotInMempool;
+      )
+      this.isLoading = false
+      this.addressBalance.balance = balance
+      this.addressBalance.totalDebits = totalDebits
+      this.addressBalance.totalCredits = totalCredits
+      this.addressBalance.totalFees = totalFees
+      this.addressBalance.totalRewards = totalRewards
+      this.addressBalance.balanceNotInMempool = balanceNotInMempool
     },
     /**
      * @Todo move this to model
      * @param operation
      * @param openField
      */
-    getTxnType({ operation, openField }) {
-      if (openField.indexOf("msg=") === 0) {
-        return "message";
+    getTxnType ({ operation, openField }) {
+      if (operation && openField.indexOf('msg=') === 0) {
+        return 'message'
       }
       const type = operation.match(
         /^([token|hypernode|tx]+){1}:*([a-zA-Z]+)*.*$/
-      );
+      )
       if (type) {
-        const [, txnNameSpace, txnNameSpaceType] = type;
-        return txnNameSpace;
+        const [, txnNameSpace, txnNameSpaceType] = type
+        return txnNameSpace
       }
 
       if (!operation || parseInt(operation) === 0) {
-        return "normal";
+        return 'normal'
       }
-      console.warn("Got unknown TXN type", { operation, openField, type });
-      return "unknown";
+      console.warn('Got unknown TXN type', { operation, openField, type })
+      return 'unknown'
     },
-    getTxnTypeIcon(txnType) {
+    getTxnTypeIcon (txnType) {
       switch (txnType) {
-        case "normal":
-          return "format_bold";
-        case "token":
-          return "star_border";
-        case "message":
-          return "sms";
+        case 'normal':
+          return 'format_bold'
+        case 'token':
+          return 'star_border'
+        case 'message':
+          return 'sms'
         default:
-          return "unknown";
+          return 'unknown'
       }
     },
-    async getAddressTxns() {
-      let addressTxnList;
+    async getAddressTxns () {
+      let addressTxnList
       try {
-        this.isLoading = true;
+        this.isLoading = true
         addressTxnList = await (await this.$sdk).getAddressTxnList(
           this.address,
-          this.txnListLimit
-        );
+          this.txnListLimit,
+        )
+
       } catch (err) {
-        console.error("getAddressTxns", { err });
+        console.error('getAddressTxns', { err })
       } finally {
-        this.isLoading = false;
+        this.isLoading = false
       }
       if (addressTxnList.length) {
         this.addressTxnList = addressTxnList.map(
@@ -463,7 +463,7 @@ export default {
             operation,
             openField
           ]) => {
-            const txnType = this.getTxnType({ operation, openField });
+            const txnType = this.getTxnType({ operation, openField })
 
             return {
               blockHeight,
@@ -480,22 +480,23 @@ export default {
               openField,
               relativeTime: timeAgo.format(
                 parseFloat(timestamp) * 1000,
-                "twitter"
+                'twitter'
               ),
-              direction: recipient === this.address ? "incoming" : "outgoing",
+              direction: recipient === this.address ? 'incoming' : 'outgoing',
               txnType,
               txnTypeIcon: this.getTxnTypeIcon(txnType)
-            };
+            }
           }
-        );
+        )
       }
     },
-    async getAdddresAndTxns() {
+    async getAdddresAndTxns () {
       // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
-      await this.getAddress().then(this.getAddressTxns);
+      await this.getAddress()
+      await this.getAddressTxns()
     }
   }
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
