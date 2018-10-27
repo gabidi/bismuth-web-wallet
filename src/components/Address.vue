@@ -4,7 +4,6 @@
             <v-layout row wrap>
                 <v-flex d-flex xs12>
                     <v-toolbar id="addressSearchToolbar">
-
                         <v-text-field
                                 hide-details
                                 prepend-icon="search"
@@ -113,16 +112,19 @@
                     <v-flex id="addressPrimaryInfoDash"
                             v-if="addressIsValid && addressBalance.balance" d-flex xs12>
                         <v-layout row wrap>
-                            <v-flex id="addressExtraInfoBalance" d-flex xs4 md4>
+                            <v-flex id="addressExtraInfoBalance" d-flex xs12 md5>
                                 <v-card>
-                                    <v-layout>
-                                        <v-flex xs4>
+                                    <v-layout row wrap>
+                                        <v-flex xs12 md3>
                                             <img src="../assets/bismuth_logo_128.png">
                                         </v-flex>
-                                        <v-flex xs7>
+                                        <v-flex xs12 md9>
                                             <v-card-title primary-title>
                                                 <div>
-                                                    <div class="display-2">{{addressBalance.balance.toFixed(4)}}</div>
+                                                    <div class="display-2">
+                                                        <VueNumeric read-only :precision="2" separator=","
+                                                                    v-model="addressBalance.balance"/>
+                                                    </div>
                                                     <div>Balance</div>
                                                 </div>
                                             </v-card-title>
@@ -141,7 +143,7 @@
                                                                     </v-card-title>
                                                                 </v-card>-->
                             </v-flex>
-                            <v-flex id="addressExtraInfoDetails" d-flex xs6 md6 offset-md2>
+                            <v-flex id="addressExtraInfoDetails" d-flex xs12 md6 offset-md1>
                                 <v-layout row wrap>
                                     <v-flex d-flex>
                                         <v-card>
@@ -149,7 +151,8 @@
                                                 <div>
                                                     <div class="headline">
                                                         <v-icon color="green" large>chevron_right</v-icon>
-                                                        {{addressBalance.totalCredits.toFixed(2)}}
+                                                        <VueNumeric read-only :precision="2" separator=","
+                                                                    v-model="addressBalance.totalCredits"/>
                                                     </div>
                                                     <div>Total Credits</div>
                                                 </div>
@@ -163,7 +166,8 @@
                                                 <div>
                                                     <div class="headline">
                                                         <v-icon color="red" large>chevron_left</v-icon>
-                                                        {{addressBalance.totalDebits.toFixed(2)}}
+                                                        <VueNumeric read-only :precision="2" separator=","
+                                                                    v-model="addressBalance.totalDebits"/>
                                                     </div>
                                                     <div>Total Debits</div>
                                                 </div>
@@ -176,7 +180,8 @@
                                                 <div>
                                                     <div class="headline">
                                                         <v-icon>local_atm</v-icon>
-                                                        {{addressBalance.totalFees.toFixed(2)}}
+                                                        <VueNumeric read-only :precision="2" separator=","
+                                                                    v-model="addressBalance.totalFees"/>
                                                     </div>
                                                     <div>Total Fees Paid</div>
                                                 </div>
@@ -213,7 +218,7 @@
                             <template slot="items" slot-scope="props">
                                 <tr>
                                     <td class="text-xs-center">
-                                       {{ props.item.blockHeight }}
+                                        {{ props.item.blockHeight }}
                                     </td>
                                     <td class="text-xs-center">
                                         <v-icon :color="props.item.direction === 'incoming' ? 'green' : 'red' ">
@@ -225,22 +230,40 @@
                                         </v-icon>
                                     </td>
                                     <td class="text-xs-center">{{ props.item.relativeTime }}</td>
-				    <td id=TxnBenefAddress class="text-xs-center">
-                                        <v-btn outline color="grey darken" @click="goToTxnBeneficiaryAddress(getTxnBeneficiaryAddress(props.item))">
-                                            {{ showFullAddress ? getTxnBeneficiaryAddress(props.item) :
-                                            $options.filters.firstLastFour(getTxnBeneficiaryAddress(props.item)) }}
-                                        </v-btn>
+                                    <td id=TxnBenefAddress class="text-xs-center">
+
+                                        <v-menu bottom offset-y>
+
+                                            <v-btn
+                                                    slot="activator"
+                                                    color="grey darken"
+                                                    outline
+                                            >
+                                                {{ showFullAddress ? getTxnBeneficiaryAddress(props.item) :
+                                                $options.filters.firstLastFour(getTxnBeneficiaryAddress(props.item)) }}
+                                            </v-btn>
+
+                                            <v-list>
+                                                <v-list-tile
+                                                        @click="goToTxnBeneficiaryAddress(getTxnBeneficiaryAddress(props.item))">
+                                                    <v-list-tile-title>Go to Address</v-list-tile-title>
+                                                </v-list-tile>
+                                                <v-list-tile>
+                                                    <v-list-tile-title>Copy Address</v-list-tile-title>
+                                                </v-list-tile>
+                                            </v-list>
+                                        </v-menu>
+
                                     </td>
                                     <td id=txnId class="text-xs-center">
-                                        <v-btn outline color="grey darken"   @click="props.expanded = !props.expanded">
+                                        <v-btn outline color="grey darken" @click="props.expanded = !props.expanded">
                                             <v-icon right left>check_circle</v-icon>
-                                        {{ showFullAddress ? props.item.txnId: props.item.txnId.slice(0,4) }}
+                                            <!--{{ showFullAddress ? props.item.txnId: props.item.txnId.slice(0,4) }}-->
                                         </v-btn>
                                     </td>
                                     <td :class="props.item.direction === 'incoming' ? 'title green--text text-xs-left' : 'title red--text text-xs-left'">
-
-                                        {{props.item.direction === 'incoming' ?"+" : "-"}}
-                                        {{ props.item.amount.toFixed(4) }}
+                                        <VueNumeric read-only :minus="true" :precision="2" separator=","
+                                                    :value="props.item.amountDirection"/>
                                     </td>
                                     <td class="text-xs-left">{{ props.item.fee }}</td>
                                     <!-- @todo These functions !-->
@@ -267,45 +290,7 @@
                                 </tr>
                             </template>
                             <template slot="expand" slot-scope="props">
-                                <v-card id="txnPrimaryInfo" flat>
-                                    <v-container
-                                            fluid
-                                            grid-list-lg
-                                    >
-                                        <v-layout row wrap>
-
-                                            <v-flex xs6>
-                                                <div class="headline">Transaction Id</div>
-                                                <div>{{props.item.txnId}}</div>
-                                                <div class="headline">Date Time</div>
-                                                <div>{{new Date(props.item.timestamp*1000)}}</div>
-                                            </v-flex>
-                                            <v-flex xs6>
-                                                <v-card>
-                                                    <v-layout>
-							    <v-flex xs5 align-center justify-center>
-							   <v-avatar :tile="tile" :size="avatarSize" color="grey lighten-4">
-                                                            <v-icon large>{{getTxnTypeIcon(props.item.txnType)}}
-                                                            </v-icon>
-						       </v-avatar>
-                                                        </v-flex>
-                                                        <v-flex xs7>
-                                                            <v-card-title primary-title>
-                                                                <div>
-                                                                    <div class="headline">{{props.item.txnType}}</div>
-                                                                    <div>{{props.item.openField}}</div>
-                                                                </div>
-                                                            </v-card-title>
-                                                        </v-flex>
-                                                    </v-layout>
-                                                </v-card>
-                                            </v-flex>
-                                        </v-layout>
-                                    </v-container>
-                                </v-card>
-				<v-card id="txnSecondaryInfo">
-					
-				</v-card>
+                                <TranscationsPrimary :txn="props.item"/>
                             </template>
                         </v-data-table>
                     </v-flex>
@@ -336,243 +321,168 @@
 </template>
 
 <script>
-  import TimeAgo from 'javascript-time-ago'
-  import en from 'javascript-time-ago/locale/en'
+/**
+   * @todo refactors Address methods to mixin
+   */
 
-  TimeAgo.locale(en)
-  const timeAgo = new TimeAgo('en-US')
-  export default {
-    name: 'Address',
-    props: ['addressId', 'autoFetch'],
-    async mounted () {
-      if (this.autoFetch && this.addressIsValid) {
-        await this.getAdddresAndTxns()
-      }
-    },
-    data () {
-      return {
-        address: this.addressId || null,
-        isLoading: false,
-        rules: {
-          length: len => v =>
-            (v || '').length === len ||
+import TranscationsPrimary from '@/components/TransactionsPrimary'
+import bismuthHelpers from '../models/bismuthMixins'
+
+export default {
+  name: 'Address',
+  components: {TranscationsPrimary},
+  mixins: [bismuthHelpers],
+
+  props: ['addressId', 'autoFetch'],
+  async mounted () {
+    if (this.autoFetch && this.addressIsValid) {
+      await this.getAdddresAndTxns()
+    }
+  },
+  data () {
+    return {
+      address: this.addressId || null,
+      isLoading: false,
+      rules: {
+        length: len => v =>
+          (v || '').length === len ||
             `Invalid character length, required ${len}`,
-          address: v =>
-            (v || '').match(/^[a-f0-9]{56}$/) ||
+        address: v =>
+          (v || '').match(/^[a-f0-9]{56}$/) ||
             'Bismuth Address should be Alphanumeric and 56 chars long',
-          required: v => !!v || 'This field is required'
-        },
-        addressBalance: {
-          balance: null,
-          totalDebits: null,
-          totalCredits: null,
-          totalFees: null,
-          totalRewards: null,
-          balanceNotInMempool: null
-        },
-        addressExtraInfo: {
-          show: true
-        },
-        txnListLimit: 10,
-        txnListOffset: 0,
-        txnListShowFullAddress: false,
-        txnListFilters: [
-          '{"type": "direction" , "value": "incoming"}',
-          '{"type": "direction" , "value": "outgoing"}'
-        ],
-        addressTxnList: []
-      }
-    },
-    filters: {
-      firstLastFour (s) {
-        return `${s.slice(0, 4)} ... ${s.slice(-4)}`
-      }
-    },
-    computed: {
-      /**
+        required: v => !!v || 'This field is required'
+      },
+      addressBalance: {
+        balance: null,
+        totalDebits: null,
+        totalCredits: null,
+        totalFees: null,
+        totalRewards: null,
+        balanceNotInMempool: null
+      },
+      addressExtraInfo: {
+        show: true
+      },
+      txnListLimit: 10,
+      txnListOffset: 0,
+      txnListShowFullAddress: false,
+      txnListFilters: [
+        '{"type": "direction" , "value": "incoming"}',
+        '{"type": "direction" , "value": "outgoing"}'
+      ],
+      addressTxnList: []
+    }
+  },
+  filters: {
+    firstLastFour (s) {
+      return `${s.slice(0, 4)} ... ${s.slice(-4)}`
+    }
+  },
+  computed: {
+    /**
        * FIXME Quick hack for slot scope  on $parent data for databale
        */
-      showFullAddress () {
-        return this.txnListShowFullAddress
-      },
-      addressIsValid () {
-        return this.address && this.rules.address(this.address).length === 1
-      },
-      addressTxnListToDisplay () {
-        let txnsToShow = this.addressTxnList
-
-        if (this.txnListFilters.length) {
-          const filters = this.txnListFilters.map(JSON.parse)
-          txnsToShow = txnsToShow.filter(t =>
-            // Using some for 'OR'
-            filters.some(({type, value}) => t[type] === value)
-          )
-        }
-        return txnsToShow
-      },
-      showLoadDialog () {
-        return this.isLoading
-      }
+    showFullAddress () {
+      return this.txnListShowFullAddress
     },
-    watch: {
-      addressId: {
-        async handler (n, o) {
-          if (this.autoFetch && n !== o) {
-            this.address = n
-            await this.getAdddresAndTxns()
-          }
-        }
-      },
-      txnListLimit: {
-        async handler (n, o) {
-          if (n !== o) {
-            await this.getAddressTxns()
-          }
+    addressIsValid () {
+      return this.address && this.rules.address(this.address).length === 1
+    },
+    addressTxnListToDisplay () {
+      let txnsToShow = this.addressTxnList
+
+      if (this.txnListFilters.length) {
+        const filters = this.txnListFilters.map(JSON.parse)
+        txnsToShow = txnsToShow.filter(t =>
+        // Using some for 'OR'
+          filters.some(({type, value}) => t[type] === value)
+        )
+      }
+      return txnsToShow
+    },
+    showLoadDialog () {
+      return this.isLoading
+    }
+  },
+  watch: {
+    addressId: {
+      async handler (n, o) {
+        if (this.autoFetch && n !== o) {
+          this.address = n
+          await this.getAdddresAndTxns()
         }
       }
     },
-    methods: {
-      reset () {
-        // FIXME Remove this before production
-        this.addressTxnList = []
-        this.addressBalance = {
-          balance: null,
-          totalDebits: null,
-          totalCredits: null,
-          totalFees: null,
-          totalRewards: null,
-          balanceNotInMempool: null
+    txnListLimit: {
+      async handler (n, o) {
+        if (n !== o) {
+          await this.getAddressTxns()
         }
-      },
-      async getAddress () {
-        this.isLoading = true
-        const [
-          balance,
-          totalCredits,
-          totalDebits,
-          totalFees,
-          totalRewards,
-          balanceNotInMempool
-        ] = (await (await this.$sdk).getAddressBalance(this.address)).map(
-          parseFloat
-        )
-        this.isLoading = false
-        this.addressBalance.balance = balance
-        this.addressBalance.totalDebits = totalDebits
-        this.addressBalance.totalCredits = totalCredits
-        this.addressBalance.totalFees = totalFees
-        this.addressBalance.totalRewards = totalRewards
-        this.addressBalance.balanceNotInMempool = balanceNotInMempool
-      },
-      /**
-       * @Todo move this to model
-       * @param operation
-       * @param openField
-       */
-      getTxnType ({operation, openField}) {
-        if (openField && openField.indexOf('msg=') === 0) {
-          return 'message'
-        }
-        const type = operation.match(
-          /^([token|hypernode|tx]+){1}:*([a-zA-Z]+)*.*$/
-        )
-        if (type) {
-          const [, txnNameSpace, txnNameSpaceType] = type
-          return txnNameSpace
-        }
-
-        if (!operation || parseInt(operation) === 0) {
-          return 'normal'
-        }
-        console.warn('Got unknown TXN type', {operation, openField, type})
-        return 'unknown'
-      },
-      getTxnTypeIcon (txnType) {
-        switch (txnType) {
-          case 'normal':
-            return 'format_bold'
-          case 'token':
-            return 'star_border'
-          case 'message':
-            return 'sms'
-          default:
-            return 'unknown'
-        }
-      },
-      getTxnIdFromSignature (sig) {
-        // Base 64 decode first 56 chars of sig
-        return sig.slice(0, 56)
-      },
-      getTxnBeneficiaryAddress ({direction, address, recipient}) {
-        return (direction === 'incoming') ? address : recipient
-      },
-      goToTxnBeneficiaryAddress (address) {
-        this.$router.push({path: `${address}?autoFetch=true`})
-      },
-      async getAddressTxns () {
-        let addressTxnList
-        try {
-          this.isLoading = true
-          addressTxnList = await (await this.$sdk).getAddressTxnList(
-            this.address,
-            this.txnListLimit
-          )
-        } catch (err) {
-          console.error('getAddressTxns', {err})
-        } finally {
-          this.isLoading = false
-        }
-        if (addressTxnList.length) {
-          this.addressTxnList = addressTxnList.map(
-            ([
-               blockHeight,
-               timestamp,
-               address,
-               recipient,
-               amount,
-               signature,
-               publicKey,
-               blockHash,
-               fee,
-               reward,
-               operation,
-               openField
-             ]) => {
-              const txnType = this.getTxnType({operation, openField})
-
-              return {
-                blockHeight,
-                timestamp,
-                address,
-                recipient,
-                amount,
-                signature,
-                publicKey,
-                blockHash,
-                fee,
-                reward,
-                operation,
-                openField,
-                relativeTime: timeAgo.format(
-                  parseFloat(timestamp) * 1000,
-                  'twitter'
-                ),
-                direction: recipient === this.address ? 'incoming' : 'outgoing',
-                txnId: this.getTxnIdFromSignature(signature),
-                txnType,
-                txnTypeIcon: this.getTxnTypeIcon(txnType)
-              }
-            }
-          )
-        }
-      },
-      async getAdddresAndTxns () {
-        // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
-        await this.getAddress()
-        await this.getAddressTxns()
       }
     }
+  },
+  methods: {
+    reset () {
+      // FIXME Remove this before production
+      this.addressTxnList = []
+      this.addressBalance = {
+        balance: null,
+        totalDebits: null,
+        totalCredits: null,
+        totalFees: null,
+        totalRewards: null,
+        balanceNotInMempool: null
+      }
+    },
+    async getAddress () {
+      this.isLoading = true
+      const [
+        balance,
+        totalCredits,
+        totalDebits,
+        totalFees,
+        totalRewards,
+        balanceNotInMempool
+      ] = (await (await this.$sdk).getAddressBalance(this.address)).map(
+        parseFloat
+      )
+      this.isLoading = false
+      this.addressBalance.balance = balance
+      this.addressBalance.totalDebits = totalDebits
+      this.addressBalance.totalCredits = totalCredits
+      this.addressBalance.totalFees = totalFees
+      this.addressBalance.totalRewards = totalRewards
+      this.addressBalance.balanceNotInMempool = balanceNotInMempool
+    },
+    goToTxnBeneficiaryAddress (address) {
+      this.$router.push({path: `${address}?autoFetch=true`})
+    },
+    async getAddressTxns () {
+      let addressTxnList
+
+      try {
+        this.isLoading = true
+        addressTxnList = await (await this.$sdk).getAddressTxnList(
+          this.address,
+          this.txnListLimit
+        )
+      } catch (err) {
+        console.error('getAddressTxns', {err})
+      } finally {
+        this.isLoading = false
+      }
+
+      if (addressTxnList.length) {
+        this.addressTxnList = addressTxnList.map(this.parseTxn)
+      }
+    },
+    async getAdddresAndTxns () {
+      // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
+      await this.getAddress()
+      await this.getAddressTxns()
+    }
   }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
