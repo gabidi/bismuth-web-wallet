@@ -51,7 +51,7 @@
             </v-flex>
         </v-layout>
 
-        <v-dialog v-model="createDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+        <v-dialog v-model="createDialog" fullscreen transition="dialog-bottom-transition">
             <NewAddress>
                 <template slot="cancel">
                     <v-btn @click="createDialog = false">Cancel and Close</v-btn>
@@ -61,6 +61,13 @@
                 </template>
             </NewAddress>
         </v-dialog>
+        <V-dialog v-model="importDialog" transition="dialog-bottom-transition">
+            <ImportDer>
+                <template slot="derLoadedActions" slot-scope="{privateKey,publicKey,address}">
+                    <v-btn @click="addAddress({privateKey,publicKey,address})">Add to AddressBook</v-btn>
+                </template>
+            </ImportDer>
+        </V-dialog>
 
     </div>
 
@@ -69,10 +76,11 @@
 <script>
 import Address from '@/components/Address'
 import NewAddress from '@/components/NewAddress'
+import ImportDer from '@/components/ImportDer'
 
 export default {
   name: 'AddressBook',
-  components: { Address, NewAddress },
+  components: { Address, NewAddress, ImportDer },
   mixins: [],
   data () {
     return {
@@ -96,7 +104,7 @@ export default {
       this.addressList.push({ address, publicKey, privateKey, autoFetch })
     },
     removeAddress (index) {
-        console.log(index)
+      console.log(index)
       this.addressList.splice(index, 1)
     }
   }
