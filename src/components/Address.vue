@@ -4,75 +4,25 @@
             <v-layout row wrap>
                 <v-flex d-flex xs12>
                     <v-toolbar id="addressSearchToolbar">
-                        <v-text-field
-                                hide-details
-                                prepend-icon="search"
-                                @click:prepend="getAdddresAndTxns"
-                                @keyup.enter.capture="getAdddresAndTxns"
-                                single-line
-                                v-model="address"
-                                placeholder="Enter a Bismuth address"
-                        ></v-text-field>
+                        <slot name="mainAction" :getAdddresAndTxns="getAdddresAndTxns" :getAddress="getAddress">
+                            <v-text-field
+                                    hide-details
+                                    append-icon="search"
+                                    @click:append="getAdddresAndTxns"
+                                    @keyup.enter.capture="getAdddresAndTxns"
+                                    single-line
+                                    v-model="address"
+                                    placeholder="Enter a Bismuth address"
+                            ></v-text-field>
+                        </slot>
 
                         <v-spacer></v-spacer>
 
                         <v-toolbar-items v-if="addressBalance.balance">
-                            <v-btn @click="getAdddresAndTxns">
+                            <v-btn @click="()=>addressExtraInfo.show = !addressExtraInfo.show">
                                 <img src="../assets/bismuth_logo_32.png">
                                 {{addressBalance.balance.toFixed(4)}}
                             </v-btn>
-
-                            <v-menu offset-x left bottom>
-                                <v-btn
-                                        icon
-                                        slot="activator">
-                                    <v-icon>settings</v-icon>
-                                </v-btn>
-                                <v-list dense>
-                                    <v-list-tile-title>Show</v-list-tile-title>
-                                    <v-list-tile-action>
-                                        <v-overflow-btn
-                                                :items="[
-                                               { text: 10},
-                                               { text: 20},
-                                               {text :50},
-                                               {text:100}
-                                            ]"
-                                                v-model="txnListLimit"
-                                                label="Show last Limit"
-                                                editable
-                                                item-value="text"
-                                        ></v-overflow-btn>
-                                    </v-list-tile-action>
-                                    <v-divider></v-divider>
-
-                                    <v-list-tile>
-                                        <v-list-tile-title>Incoming</v-list-tile-title>
-                                        <v-list-tile-action>
-
-                                            <v-checkbox v-model="txnListFilters" color="success"
-                                                        value='{"type": "direction" , "value": "incoming"}'></v-checkbox>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-list-tile>
-
-                                        <v-list-tile-title>Outgoing</v-list-tile-title>
-                                        <v-list-tile-action>
-                                            <v-checkbox v-model="txnListFilters" color="red"
-                                                        value='{"type": "direction" , "value": "outgoing"}'></v-checkbox>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-list-tile>
-
-                                        <v-list-tile-title>Full Address</v-list-tile-title>
-                                        <v-list-tile-action>
-                                            <v-switch v-model="txnListShowFullAddress"></v-switch>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-
-                                </v-list>
-
-                            </v-menu>
                             <v-spacer></v-spacer>
                             <v-menu offset-x left bottom>
                                 <v-btn
@@ -101,11 +51,9 @@
                             </v-menu>
 
                         </v-toolbar-items>
-                        <v-toolbar-items v-else>
-                            <v-btn icon fab top right color="red">
-                                <v-icon>add</v-icon>
-                            </v-btn>
-                        </v-toolbar-items>
+                        <slot name="addressAction" :publicKey="publicKey" :privateKey="privateKey">
+
+                        </slot>
                     </v-toolbar>
                 </v-flex>
                 <template v-if="addressExtraInfo.show">
@@ -118,7 +66,7 @@
                                         <v-flex xs12 md3>
                                             <img src="../assets/bismuth_logo_128.png">
                                         </v-flex>
-                                        <v-flex xs12 md9>
+                                        <v-flex xs12 md7>
                                             <v-card-title primary-title>
                                                 <div>
                                                     <div class="display-2">
@@ -128,6 +76,59 @@
                                                     <div>Balance</div>
                                                 </div>
                                             </v-card-title>
+                                        </v-flex>
+                                        <v-flex md2>
+                                            <v-menu offset-x left bottom>
+                                                <v-btn
+                                                        icon
+                                                        slot="activator">
+                                                    <v-icon>settings</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile-title>Show</v-list-tile-title>
+                                                    <v-list-tile-action>
+                                                        <v-overflow-btn
+                                                                :items="[
+                                               { text: 10},
+                                               { text: 20},
+                                               {text :50},
+                                               {text:100}
+                                            ]"
+                                                                v-model="txnListLimit"
+                                                                label="Show last Limit"
+                                                                editable
+                                                                item-value="text"
+                                                        ></v-overflow-btn>
+                                                    </v-list-tile-action>
+                                                    <v-divider></v-divider>
+
+                                                    <v-list-tile>
+                                                        <v-list-tile-title>Incoming</v-list-tile-title>
+                                                        <v-list-tile-action>
+
+                                                            <v-checkbox v-model="txnListFilters" color="success"
+                                                                        value='{"type": "direction" , "value": "incoming"}'></v-checkbox>
+                                                        </v-list-tile-action>
+                                                    </v-list-tile>
+                                                    <v-list-tile>
+
+                                                        <v-list-tile-title>Outgoing</v-list-tile-title>
+                                                        <v-list-tile-action>
+                                                            <v-checkbox v-model="txnListFilters" color="red"
+                                                                        value='{"type": "direction" , "value": "outgoing"}'></v-checkbox>
+                                                        </v-list-tile-action>
+                                                    </v-list-tile>
+                                                    <v-list-tile>
+
+                                                        <v-list-tile-title>Full Address</v-list-tile-title>
+                                                        <v-list-tile-action>
+                                                            <v-switch v-model="txnListShowFullAddress"></v-switch>
+                                                        </v-list-tile-action>
+                                                    </v-list-tile>
+
+                                                </v-list>
+
+                                            </v-menu>
                                         </v-flex>
                                     </v-layout>
                                 </v-card>
@@ -322,18 +323,18 @@
 
 <script>
 /**
-   * @todo refactors Address methods to mixin
-   */
+     * @todo refactors Address methods to mixin
+     */
 
 import TranscationsPrimary from '@/components/TransactionsPrimary'
 import bismuthHelpers from '../models/bismuthMixins'
 
 export default {
   name: 'Address',
-  components: {TranscationsPrimary},
+  components: { TranscationsPrimary },
   mixins: [bismuthHelpers],
 
-  props: ['addressId', 'autoFetch'],
+  props: ['addressId', 'autoFetch','publicKey','privateKey'],
   async mounted () {
     if (this.autoFetch && this.addressIsValid) {
       await this.getAdddresAndTxns()
@@ -346,10 +347,10 @@ export default {
       rules: {
         length: len => v =>
           (v || '').length === len ||
-            `Invalid character length, required ${len}`,
+                        `Invalid character length, required ${len}`,
         address: v =>
           (v || '').match(/^[a-f0-9]{56}$/) ||
-            'Bismuth Address should be Alphanumeric and 56 chars long',
+                        'Bismuth Address should be Alphanumeric and 56 chars long',
         required: v => !!v || 'This field is required'
       },
       addressBalance: {
@@ -380,8 +381,8 @@ export default {
   },
   computed: {
     /**
-       * FIXME Quick hack for slot scope  on $parent data for databale
-       */
+             * FIXME Quick hack for slot scope  on $parent data for databale
+             */
     showFullAddress () {
       return this.txnListShowFullAddress
     },
@@ -395,7 +396,7 @@ export default {
         const filters = this.txnListFilters.map(JSON.parse)
         txnsToShow = txnsToShow.filter(t =>
         // Using some for 'OR'
-          filters.some(({type, value}) => t[type] === value)
+          filters.some(({ type, value }) => t[type] === value)
         )
       }
       return txnsToShow
@@ -407,9 +408,8 @@ export default {
   watch: {
     addressId: {
       async handler (n, o) {
-        if (this.autoFetch && n !== o) {
+        if (n !== o) {
           this.address = n
-          await this.getAdddresAndTxns()
         }
       }
     },
@@ -455,7 +455,7 @@ export default {
       this.addressBalance.balanceNotInMempool = balanceNotInMempool
     },
     goToTxnBeneficiaryAddress (address) {
-      this.$router.push({path: `${address}?autoFetch=true`})
+      this.$router.push({ path: `${address}?autoFetch=true` })
     },
     async getAddressTxns () {
       let addressTxnList
@@ -467,7 +467,7 @@ export default {
           this.txnListLimit
         )
       } catch (err) {
-        console.error('getAddressTxns', {err})
+        console.error('getAddressTxns', { err })
       } finally {
         this.isLoading = false
       }

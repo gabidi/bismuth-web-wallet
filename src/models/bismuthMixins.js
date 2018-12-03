@@ -10,7 +10,7 @@ const bismuthHelpers = {
      * @param operation
      * @param openField
      */
-    getTxnType ({operation, openField}) {
+    getTxnType ({ operation, openField }) {
       if (openField && openField.indexOf('msg=') === 0) {
         return 'message'
       }
@@ -25,7 +25,7 @@ const bismuthHelpers = {
       if (!operation || parseInt(operation) === 0) {
         return 'normal'
       }
-      console.warn('Got unknown TXN type', {operation, openField, type})
+      console.warn('Got unknown TXN type', { operation, openField, type })
       return 'unknown'
     },
     getTxnTypeIcon (txnType) {
@@ -44,10 +44,10 @@ const bismuthHelpers = {
       // Base 64 decode first 56 chars of sig
       return sig.slice(0, 56)
     },
-    getTxnBeneficiaryAddress ({direction, address, recipient}) {
+    getTxnBeneficiaryAddress ({ direction, address, recipient }) {
       return (direction === 'incoming') ? address : recipient
     },
-    getTxnAmountDirection ({direction, amount}) {
+    getTxnAmountDirection ({ direction, amount }) {
       return (direction === 'incoming' ? 1 : -1) * parseFloat(amount)
     },
     parseTxn ([
@@ -64,7 +64,7 @@ const bismuthHelpers = {
       operation,
       openField
     ]) {
-      const txnType = this.getTxnType({operation, openField})
+      const txnType = this.getTxnType({ operation, openField })
       const direction = recipient === this.address ? 'incoming' : 'outgoing'
       return {
         blockHeight,
@@ -72,7 +72,7 @@ const bismuthHelpers = {
         address,
         recipient,
         amount,
-        amountDirection: this.getTxnAmountDirection({direction, amount}),
+        amountDirection: this.getTxnAmountDirection({ direction, amount }),
         signature,
         publicKey,
         blockHash,

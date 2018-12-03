@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Address from '@/components/Address'
+import AddressBook from '@/components/AddressBook'
 import NewAddress from '@/components/NewAddress'
 import Landing from '@/components/Landing'
 import Transactions from '@/components/Transactions'
@@ -11,7 +11,7 @@ export default new Router({
   routes: [
     {
       path: '/txns/:txnId/:txnAddresses?',
-      name: Transactions,
+      name: 'Transactions',
       component: Transactions,
       props: route => {
         return {
@@ -23,7 +23,7 @@ export default new Router({
     },
     {
       path: '/',
-      name: Landing,
+      name: 'Landing',
       component: Landing
     },
     {
@@ -37,16 +37,16 @@ export default new Router({
       component: NewAddress
     },
     {
-      path: '/address/:addressId?',
-      name: 'Address',
+      path: '/Address/:addressId?',
+      name: 'AddressBook',
       props: route => {
         return {
           autoFetch: !!route.query.autoFetch,
           addressId: route.params.addressId
         }
       },
-      component: Address
-    },
+      component: AddressBook
+    }
 
   ]
 })

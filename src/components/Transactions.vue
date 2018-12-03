@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-layout wrap row>
+        <v-layout wrap row v-if="showTxnDetails">
             <v-flex xs12 v-if="txnData">
                 <TranscationsPrimary :txn="txnData"/>
             </v-flex>
@@ -39,7 +39,7 @@ import TranscationsDetails from '@/components/TransactionsDetails'
 
 export default {
   name: 'Transcations',
-  components: {TranscationsPrimary,TranscationsDetails},
+  components: { TranscationsPrimary, TranscationsDetails },
   props: ['txnId', 'txn', 'addresses'],
   mixins: [bismuthHelpers],
   async mounted () {
@@ -54,7 +54,11 @@ export default {
     }
   },
   filters: {},
-  computed: {},
+  computed: {
+    showTxnDetails () {
+      return this.txnId && this.txnData
+    }
+  },
   watch: {},
   methods: {
     async getTxn () {
