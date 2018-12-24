@@ -20,32 +20,39 @@
                             </template>
 
                             <template slot="addressVertMenu" slot-scope="{addressKeysLoaded}">
+
+                                <v-list-tile v-if="!addressKeysLoaded" @click="importDialog = true">
+                                    <v-list-tile-avatar>
+                                        <v-icon>fa-file-import</v-icon>
+                                    </v-list-tile-avatar>
+                                    <v-list-tile-title>Import Keys</v-list-tile-title>
+                                </v-list-tile>
                                 <v-list-tile v-if="addressList.length > 1" icon small color="red"
                                              @click="removeAddress(index)">
-                                    <v-icon>remove</v-icon>
+                                    <v-list-tile-avatar>
+                                        <v-icon>fa-minus</v-icon>
+                                    </v-list-tile-avatar>
                                     <v-list-tile-title>Delete</v-list-tile-title>
-                                </v-list-tile>
-                                <v-list-tile v-if="!addressKeysLoaded">
-                                    <v-icon>import</v-icon>
-                                    <v-list-tile-title>Import Keys</v-list-tile-title>
                                 </v-list-tile>
                             </template>
 
                             <template slot="addressKeyLoadedAction" slot-scope="{publicKey,privateKey,address}">
-                                    <v-btn @click="signTxn = true">
-                                        Send Txn
-                                    </v-btn>
-                                    <v-dialog v-model="signTxn" transition="dialog-bottom-transition">
-                                        <TransactionsSign :address="address" :privateKey="privateKey"
-                                                          :publicKey="publicKey">
-                                            <template slot="txnSentAction"
-                                                      slot-scope="{txnSent,amount,recipient,txnSentResult}">
-                                                You sent {{amount}} to {{recipient}}
-                                                <code>{{txnSentResult}}</code>
-                                                <v-btn @click="signTxn=false">Close</v-btn>
-                                            </template>
-                                        </TransactionsSign>
-                                    </v-dialog>
+                                <v-btn @click="signTxn = true">
+                                    Send Txn
+                                </v-btn>
+                                <v-dialog v-model="signTxn" transition="dialog-bottom-transition">
+                                    <TransactionsSign :address="address" :privateKey="privateKey"
+                                                      :publicKey="publicKey"
+                                                        :resetToggle="signTxn"
+                                    >
+                                        <template slot="txnSentAction"
+                                                  slot-scope="{txnSent,amount,recipient,txnSentResult}">
+                                            You sent {{amount}} to {{recipient}}
+                                            <code>{{txnSentResult}}</code>
+                                            <v-btn @click="signTxn=false">Close</v-btn>
+                                        </template>
+                                    </TransactionsSign>
+                                </v-dialog>
                             </template>
                         </Address>
                     </div>
@@ -54,13 +61,16 @@
             <v-flex xs12>
                 <v-menu bottom left>
                     <v-btn slot="activator" icon fab color="red">
-                        <v-icon>add</v-icon>
+                        <v-icon>fa-plus</v-icon>
                     </v-btn>
                     <v-list>
                         <v-list-tile @click="addAddress('')">
                             <v-list-tile-title>Search</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="importDialog = true">
+                            <v-list-tile-avatar>
+                                <v-icon>fa-file-import</v-icon>
+                            </v-list-tile-avatar>
                             <v-list-tile-title>Import Keys</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="toggleCreateNewDialog(true)">
@@ -72,7 +82,7 @@
         </v-layout>
 
         <v-dialog v-model="createDialog" fullscreen transition="dialog-bottom-transition">
-            <NewAddress>
+            <NewAddress :resetToggle="createDialog">
                 <template slot="cancel">
                     <v-btn @click="createDialog = false">Cancel and Close</v-btn>
                 </template>
@@ -84,10 +94,9 @@
             </NewAddress>
         </v-dialog>
         <v-dialog v-model="importDialog" transition="dialog-bottom-transition">
-            <ImportDer>
+            <ImportDer :resetToggle="importDialog">
                 <template slot="derLoadedActions" slot-scope="{privateKey,publicKey,address}">
                     <v-btn @click="addAddress({privateKey,publicKey,address,autoFetch:true})">Add to AddressBook</v-btn>
-
                 </template>
             </ImportDer>
         </v-dialog>

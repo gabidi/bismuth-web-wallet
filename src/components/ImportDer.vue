@@ -1,36 +1,58 @@
 <template>
-    <div>
-        <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-            <template v-if="derLoaded"></template>
-            <v-text-field label="Select Image" @click='pickFile' v-model='derFileName'
-                          prepend-icon='attach_file'></v-text-field>
-            <input
-                    type="file"
-                    style="display: none"
-                    ref="walletFile"
-                    accept="*"
-                    @change="onFilePicked"
-            >
-        </v-flex>
-        <template v-if="derLoaded">
-  	<v-alert success>Keys sucessfully loaded !</v-alert>
+    <v-card>
+        <v-layout row wrap>
+            <v-flex xs12 v-if="derLoaded">
+                <v-alert
+                        v-model="derLoaded"
+                        type="success"
+                        transition="scale-transition"
+                        color="success">Keys sucessfully loaded !
+                </v-alert>
+            </v-flex>
+            <v-flex xs12 v-if="invalidDerFile">
+                <v-alert transition="scale-transition"
+                         type="error"
+                         v-model="invalidDerFile"
+                         color="error">Invalid der file provided.
+                </v-alert>
+            </v-flex>
+            <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+                <template v-if="derLoaded"></template>
+                <v-text-field label="Select Der File" @click='pickFile' v-model='derFileName'
+                              prepend-icon='attach_file'></v-text-field>
+                <input
+                        type="file"
+                        style="display: none"
+                        ref="walletFile"
+                        accept="*"
+                        @change="onFilePicked"
+                >
+            </v-flex>
+        </v-layout>
+        <v-card-actions v-if="derLoaded">
             <slot name="derLoadedActions" :privateKey="privateKey" :publicKey="publicKey" :address="address">
-
             </slot>
-        </template>
-    </div>
+        </v-card-actions>
+    </v-card>
 </template>
 
 <script>
 export default {
   name: 'ImportDer',
+  props: ['resetToggle'],
   data () {
     return {
       derFileName: '',
       publicKey: '',
       privateKey: '',
       address: '',
-      derLoaded: false
+      derLoaded: false,
+      invalidDerFile: false
+    }
+  },
+  watch: {
+    resetToggle () {
+      Object.assign(this.$data, this.$options.data.apply(this))
     }
   },
   methods: {
@@ -38,21 +60,35 @@ export default {
       this.$refs.walletFile.click()
     },
     onFilePicked (e) {
+      this.invalidDerFile = false
       const files = e.target.files
       if (files[0] !== undefined) {
         this.derFileName = files[0].name
         if (this.derFileName.lastIndexOf('.') <= 0) {
+          this.invalidDerFile = true
           return
         }
         const fr = new FileReader()
         fr.addEventListener('load', () => {
           const derFileContents = atob(fr.result.split(',')[1])
-          if (!derFileContents.length) { return }
-          const { PrivateKey, PublicKey, Address } = JSON.parse(derFileContents)
-          this.publicKey = PublicKey
-          this.privateKey = PrivateKey
-          this.address = Address
-          this.derLoaded = true
+          if (!derFileContents.length) {
+            this.invalidDerFile = true
+            return
+          }
+
+          try {
+            const { PrivateKey, PublicKey, Address } = JSON.parse(derFileContents)
+            if (!PrivateKey || !PublicKey || !Address) {
+              this.invalidDerFile = true
+              return
+            }
+            this.publicKey = PublicKey
+            this.privateKey = PrivateKey
+            this.address = Address
+            this.derLoaded = true
+          } catch (err) {
+            this.invalidDerFile = true
+          }
         })
         fr.readAsDataURL(files[0])
       } else {

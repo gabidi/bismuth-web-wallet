@@ -119,7 +119,7 @@ import { sign } from 'bismuth-js-crypto'
 
 export default {
   name: 'TransactionsSign',
-  props: ['address', 'publicKey', 'privateKey'],
+  props: ['address', 'publicKey', 'privateKey', 'resetToggle'],
   mixins: [bismuthHelpers],
   async mounted () {
   },
@@ -150,7 +150,11 @@ export default {
   },
   filters: {},
   computed: {},
-  watch: {},
+  watch: {
+    resetToggle () {
+      Object.assign(this.$data, this.$options.data.apply(this))
+    }
+  },
   methods: {
     sign ({
       timestamp = Date.now() / 1000,

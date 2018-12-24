@@ -151,7 +151,7 @@ export default {
   name: 'NewAddress',
   components: {},
   mixins: [],
-  props: [],
+  props: ['resetToggle'],
   mounted () {
   },
   data () {
@@ -183,7 +183,11 @@ export default {
       return parseInt(this.entropyProgress.slice(0, -1))
     }
   },
-  watch: {},
+  watch: {
+    resetToggle () {
+      Object.assign(this.$data, this.$options.data.apply(this))
+    }
+  },
   methods: {
     stepGenSeed () {
       this.makeMnemonicFromEntropySha()
