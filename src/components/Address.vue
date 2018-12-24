@@ -4,10 +4,15 @@
             <v-layout row wrap>
                 <v-flex d-flex xs12>
                     <v-toolbar id="addressSearchToolbar">
-                        <slot name="mainAction" :getAdddresAndTxns="getAdddresAndTxns" :getAddress="getAddress">
+                        <slot name="mainAction"
+                              :getAdddresAndTxns="getAdddresAndTxns"
+                              :getAddress="getAddress"
+                              :addressKeysLoaded="addressKeysLoaded"
+                        >
                             <v-text-field
                                     hide-details
-                                    append-icon="search"
+                                    :append-icon="privateKey? 'lock' : 'search'"
+                                    :disable="privateKey"
                                     @click:append="getAdddresAndTxns"
                                     @keyup.enter.capture="getAdddresAndTxns"
                                     single-line
@@ -17,13 +22,19 @@
                         </slot>
 
                         <v-spacer></v-spacer>
-
                         <v-toolbar-items v-if="addressBalance.balance">
                             <v-btn @click="()=>addressExtraInfo.show = !addressExtraInfo.show">
                                 <img src="../assets/bismuth_logo_32.png">
                                 {{addressBalance.balance.toFixed(4)}}
                             </v-btn>
                             <v-spacer></v-spacer>
+
+                            <template v-if="addressKeysLoaded">
+                                <slot name="addressKeyLoadedAction" :publicKey="publicKey" :privateKey="privateKey"
+                                  :address="address">
+
+                                </slot>
+                            </template>
                             <v-menu offset-x left bottom>
                                 <v-btn
                                         icon
@@ -36,24 +47,15 @@
                                             {{ (addressExtraInfo.show) ? 'Hide' : 'Show'}}
                                         </v-list-tile-title>
                                     </v-list-tile>
-                                    <v-list-tile @click="reset">
-                                        <v-list-tile-title>Clear</v-list-tile-title>
-                                    </v-list-tile>
                                     <v-divider></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-title>Make Alias</v-list-tile-title>
-                                    </v-list-tile>
-                                    <v-list-tile>
-                                        <v-list-tile-title>Import Keys</v-list-tile-title>
-                                    </v-list-tile>
+                                    <slot name="addressVertMenu" :addressKeysLoaded="addressKeysLoaded">
 
+                                    </slot>
                                 </v-list>
                             </v-menu>
 
                         </v-toolbar-items>
-                        <slot name="addressAction" :publicKey="publicKey" :privateKey="privateKey">
 
-                        </slot>
                     </v-toolbar>
                 </v-flex>
                 <template v-if="addressExtraInfo.show">
@@ -334,7 +336,7 @@ export default {
   components: { TranscationsPrimary },
   mixins: [bismuthHelpers],
 
-  props: ['addressId', 'autoFetch','publicKey','privateKey'],
+  props: ['addressId', 'autoFetch', 'publicKey', 'privateKey'],
   async mounted () {
     if (this.autoFetch && this.addressIsValid) {
       await this.getAdddresAndTxns()
@@ -403,6 +405,9 @@ export default {
     },
     showLoadDialog () {
       return this.isLoading
+    },
+    addressKeysLoaded () {
+      return !!(this.privateKey && this.publicKey)
     }
   },
   watch: {
@@ -422,18 +427,6 @@ export default {
     }
   },
   methods: {
-    reset () {
-      // FIXME Remove this before production
-      this.addressTxnList = []
-      this.addressBalance = {
-        balance: null,
-        totalDebits: null,
-        totalCredits: null,
-        totalFees: null,
-        totalRewards: null,
-        balanceNotInMempool: null
-      }
-    },
     async getAddress () {
       this.isLoading = true
       const [

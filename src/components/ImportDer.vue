@@ -13,6 +13,7 @@
             >
         </v-flex>
         <template v-if="derLoaded">
+  	<v-alert success>Keys sucessfully loaded !</v-alert>
             <slot name="derLoadedActions" :privateKey="privateKey" :publicKey="publicKey" :address="address">
 
             </slot>
@@ -49,8 +50,8 @@ export default {
           if (!derFileContents.length) { return }
           const { PrivateKey, PublicKey, Address } = JSON.parse(derFileContents)
           this.publicKey = PublicKey
-          this.privateKey = PrivateKey // this is an image file that can be sent to server...
-          this.address = Address // this is an image file that can be sent to server...
+          this.privateKey = PrivateKey
+          this.address = Address
           this.derLoaded = true
         })
         fr.readAsDataURL(files[0])

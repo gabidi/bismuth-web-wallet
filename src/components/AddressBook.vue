@@ -4,11 +4,13 @@
             <v-flex xs12>
                 <template v-if="addressList.length">
                     <div v-for="(entry,index) in addressList">
-                        <Address :addressId="entry.address" :publicKey="entry.publicKey" :privateKey="entry.privateKey" :autoFetch="entry.autoFetch">
-                            <template slot="mainAction" slot-scope="{ getAdddresAndTxns }">
+                        <Address :addressId="entry.address" :publicKey="entry.publicKey" :privateKey="entry.privateKey"
+                                 :autoFetch="entry.autoFetch">
+                            <template slot="mainAction" slot-scope="{ getAdddresAndTxns ,addressKeysLoaded}">
                                 <v-text-field
                                         hide-details
-                                        append-icon="search"
+                                        :append-icon="addressKeysLoaded? 'fa-lock' : 'search'"
+                                        :disabled="addressKeysLoaded"
                                         @click:append="getAdddresAndTxns"
                                         @keyup.enter.capture="getAdddresAndTxns"
                                         single-line
@@ -16,16 +18,34 @@
                                         placeholder="Enter a Bismuth address"
                                 ></v-text-field>
                             </template>
-                            <template slot="addressAction" slot-scope="{publicKey,privateKey}">
-                                <template v-if="privateKey">
-                                    <v-btn>
-                                        <v-icon>fa-lock</v-icon>
+
+                            <template slot="addressVertMenu" slot-scope="{addressKeysLoaded}">
+                                <v-list-tile v-if="addressList.length > 1" icon small color="red"
+                                             @click="removeAddress(index)">
+                                    <v-icon>remove</v-icon>
+                                    <v-list-tile-title>Delete</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile v-if="!addressKeysLoaded">
+                                    <v-icon>import</v-icon>
+                                    <v-list-tile-title>Import Keys</v-list-tile-title>
+                                </v-list-tile>
+                            </template>
+
+                            <template slot="addressKeyLoadedAction" slot-scope="{publicKey,privateKey,address}">
+                                    <v-btn @click="signTxn = true">
                                         Send Txn
                                     </v-btn>
-                                </template>
-                                <v-btn v-if="index !== 0" icon small color="red" @click="removeAddress(index)">
-                                    <v-icon>remove</v-icon>
-                                </v-btn>
+                                    <v-dialog v-model="signTxn" transition="dialog-bottom-transition">
+                                        <TransactionsSign :address="address" :privateKey="privateKey"
+                                                          :publicKey="publicKey">
+                                            <template slot="txnSentAction"
+                                                      slot-scope="{txnSent,amount,recipient,txnSentResult}">
+                                                You sent {{amount}} to {{recipient}}
+                                                <code>{{txnSentResult}}</code>
+                                                <v-btn @click="signTxn=false">Close</v-btn>
+                                            </template>
+                                        </TransactionsSign>
+                                    </v-dialog>
                             </template>
                         </Address>
                     </div>
@@ -58,57 +78,63 @@
                 </template>
                 <template slot="finalAction" slot-scope="{addressKeys}">
                     <v-btn @click="addAddress(addressKeys)">Add to AddressBook</v-btn>
+                    <v-btn @click="createDialog = false">Close</v-btn>
+
                 </template>
             </NewAddress>
         </v-dialog>
-        <V-dialog v-model="importDialog" transition="dialog-bottom-transition">
+        <v-dialog v-model="importDialog" transition="dialog-bottom-transition">
             <ImportDer>
                 <template slot="derLoadedActions" slot-scope="{privateKey,publicKey,address}">
-                    <v-btn @click="addAddress({privateKey,publicKey,address})">Add to AddressBook</v-btn>
+                    <v-btn @click="addAddress({privateKey,publicKey,address,autoFetch:true})">Add to AddressBook</v-btn>
+
                 </template>
             </ImportDer>
-        </V-dialog>
+        </v-dialog>
 
     </div>
 
 </template>
 
 <script>
-import Address from '@/components/Address'
-import NewAddress from '@/components/NewAddress'
-import ImportDer from '@/components/ImportDer'
+    import Address from '@/components/Address'
+    import NewAddress from '@/components/NewAddress'
+    import ImportDer from '@/components/ImportDer'
+    import TransactionsSign from '@/components/TransactionsSign'
 
-export default {
-  name: 'AddressBook',
-  components: { Address, NewAddress, ImportDer },
-  mixins: [],
-  data () {
-    return {
-      addressList: [{ addressId: null, autoFetch: false }],
-      importDialog: false,
-      createDialog: false
+    export default {
+        name: 'AddressBook',
+        components: {Address, NewAddress, ImportDer, TransactionsSign},
+        mixins: [],
+        data() {
+            return {
+                addressList: [{addressId: null, autoFetch: false}],
+                importDialog: false,
+                createDialog: false,
+                signTxn: false,
+            }
+        },
+        provide() {
+            return {
+                // addAddress: this.addAddress,
+                // removeAddress: this.removeAddress
+            }
+        },
+        computed: {},
+        methods: {
+            toggleCreateNewDialog(value = false) {
+                this.createDialog = value
+            },
+
+            addAddress({address, publicKey = null, privateKey = null, autoFetch = false} = {}) {
+                this.addressList.push({address, publicKey, privateKey, autoFetch})
+            },
+            removeAddress(index) {
+                console.log(index)
+                this.addressList.splice(index, 1)
+            }
+        }
     }
-  },
-  provide () {
-    return {
-      // addAddress: this.addAddress,
-      // removeAddress: this.removeAddress
-    }
-  },
-  computed: {},
-  methods: {
-    toggleCreateNewDialog (value = false) {
-      this.createDialog = value
-    },
-    addAddress ({ address, publicKey = null, privateKey = null, autoFetch = false } = {}) {
-      this.addressList.push({ address, publicKey, privateKey, autoFetch })
-    },
-    removeAddress (index) {
-      console.log(index)
-      this.addressList.splice(index, 1)
-    }
-  }
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
