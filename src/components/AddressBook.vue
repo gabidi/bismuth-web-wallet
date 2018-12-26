@@ -1,6 +1,6 @@
 <template>
     <div id="addressBook">
-        <v-layout row wrap>
+        <v-layout row wrap justify-center align-center>
             <v-flex xs12>
                 <template v-if="addressList.length">
                     <div v-for="(entry,index) in addressList">
@@ -59,25 +59,35 @@
                 </template>
             </v-flex>
             <v-flex xs12>
-                <v-menu bottom left>
-                    <v-btn slot="activator" icon fab color="red">
-                        <v-icon>fa-plus</v-icon>
-                    </v-btn>
-                    <v-list>
-                        <v-list-tile @click="addAddress('')">
-                            <v-list-tile-title>Search</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile @click="importDialog = true">
-                            <v-list-tile-avatar>
-                                <v-icon>fa-file-import</v-icon>
-                            </v-list-tile-avatar>
-                            <v-list-tile-title>Import Keys</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile @click="toggleCreateNewDialog(true)">
-                            <v-list-tile-title>Create New</v-list-tile-title>
-                        </v-list-tile>
-                    </v-list>
-                </v-menu>
+		<v-layout row wrap align-end justify-end>
+			<v-flex xs2>
+				<v-menu top right>
+                	    		<v-btn slot="activator" icon fab bottom right color="red">
+                	    		    <v-icon>fa-plus</v-icon>
+                	    		</v-btn>
+                	    		<v-list>
+                	    		    <v-list-tile @click="addAddress('')">
+                	    		        <v-list-tile-avatar>
+                	    		            <v-icon>fa-search</v-icon>
+                	    		        </v-list-tile-avatar>
+                	    		        <v-list-tile-title>Search</v-list-tile-title>
+                	    		    </v-list-tile>
+                	    		    <v-list-tile @click="importDialog = true">
+                	    		        <v-list-tile-avatar>
+                	    		            <v-icon>fa-file-import</v-icon>
+                	    		        </v-list-tile-avatar>
+                	    		        <v-list-tile-title>Import Keys</v-list-tile-title>
+                	    		    </v-list-tile>
+                	    		    <v-list-tile @click="toggleCreateNewDialog(true)">
+                	    		        <v-list-tile-avatar>
+                	    		            <v-icon>fa-plus</v-icon>
+                	    		        </v-list-tile-avatar>
+                	    		        <v-list-tile-title>Create New</v-list-tile-title>
+                	    		    </v-list-tile>
+                	    		</v-list>
+                		</v-menu>
+			</v-flex>
+		</v-layout>
             </v-flex>
         </v-layout>
 

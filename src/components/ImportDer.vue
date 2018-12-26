@@ -18,7 +18,7 @@
             </v-flex>
             <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
                 <template v-if="derLoaded"></template>
-                <v-text-field label="Select Der File" @click='pickFile' v-model='derFileName'
+                <v-text-field label="Click here to Select Der File" @click='pickFile' v-model='derFileName'
                               prepend-icon='attach_file'></v-text-field>
                 <input
                         type="file"

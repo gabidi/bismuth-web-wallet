@@ -63,7 +63,9 @@
                                     color="grey lighten-1"
                                     height="200px"
                             >
-                                {{twelveWordSeed}}
+			    <v-card-title>
+				    {{twelveWordSeed}}
+			    </v-card-title>
 
                                 <v-text-field
                                         v-model="password"
