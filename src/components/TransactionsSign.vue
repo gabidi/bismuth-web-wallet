@@ -1,6 +1,9 @@
 <template>
     <div>
-        <v-card id="txnPrimaryInfo" flat>
+        <v-card id="txnPrimaryInfo">
+            <v-card-title>
+                <span class="headline">Send from Address: {{address}}</span>
+            </v-card-title>
             <v-container
                     fluid
                     grid-list-lg
