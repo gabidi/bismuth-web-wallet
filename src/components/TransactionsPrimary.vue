@@ -8,7 +8,7 @@
                 <v-flex xs6 offset-xs1>
                     <div class="headline">Transaction Id
                         <v-tooltip bottom>
-                            <v-btn slot="activator" flat icon medium dark @click="copyToClipBoard">
+                            <v-btn slot="activator" flat icon medium dark @click="copyToClipboard(txn.txnId)">
                                 <v-icon>assignment</v-icon>
                             </v-btn>
                             <span>Copy to clipboard.</span>

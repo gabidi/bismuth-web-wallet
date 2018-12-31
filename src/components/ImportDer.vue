@@ -6,14 +6,14 @@
                         v-model="derLoaded"
                         type="success"
                         transition="scale-transition"
-                        color="success">Keys sucessfully loaded !
+                        color="success">Keys sucessfully loaded ! Click on "Add to address book" to add address
                 </v-alert>
             </v-flex>
             <v-flex xs12 v-if="invalidDerFile">
                 <v-alert transition="scale-transition"
                          type="error"
                          v-model="invalidDerFile"
-                         color="error">Invalid der file provided.
+                         color="error">Invalid der file provided. Please select another file.
                 </v-alert>
             </v-flex>
             <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">

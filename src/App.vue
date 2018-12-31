@@ -4,46 +4,6 @@
                 dark
                 id="bis_wallet"
         >
-            <v-navigation-drawer
-                    fixed
-                    clipped
-                    v-model="drawer"
-                    app
-            >
-                <v-list dense>
-                    <v-list-tile v-for="item in items" :key="item.text"  @click="" :to="item.link">
-                            <v-list-tile-action>
-                                <v-icon>{{ item.icon }}</v-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title>
-                                    {{ item.text }}
-                                </v-list-tile-title>
-                            </v-list-tile-content>
-                    </v-list-tile>
-                    <v-subheader class="mt-3 grey--text text--darken-1">Address Book</v-subheader>
-                    <v-list>
-                        <v-list-tile v-for="item in addressBook" :key="item.text" avatar @click="">
-                            <v-list-tile-avatar>
-                                <img :src="`https://randomuser.me/api/portraits/women/${item.picture}.jpg`" alt="">
-                            </v-list-tile-avatar>
-                            <v-list-tile-title v-text="item.text"></v-list-tile-title>
-                        </v-list-tile>
-                    </v-list>
-                    <v-list-tile class="mt-3" @click="">
-                        <v-list-tile-action>
-                            <v-icon color="grey darken-1">add_circle_outline</v-icon>
-                        </v-list-tile-action>
-                        <v-list-tile-title class="grey--text text--darken-1">Browse Chain</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @click="">
-                        <v-list-tile-action>
-                            <v-icon color="grey darken-1">settings</v-icon>
-                        </v-list-tile-action>
-                        <v-list-tile-title class="grey--text text--darken-1">Wallet Settings</v-list-tile-title>
-                    </v-list-tile>
-                </v-list>
-            </v-navigation-drawer>
             <v-toolbar
                     color="blue-grey darken-4"
                     dense
@@ -51,7 +11,8 @@
                     clipped-left
                     app
             >
-                <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-toolbar-side-icon>
+                    <v-icon><img src="assets/bismuth_logo_128.png"></v-icon></v-toolbar-side-icon>
                 <v-toolbar-title class="mr-5 align-center">
                     <span class="title" color="deep-purple accent-4">Bismuth Apps - Alpha  - DO NOT USE.</span>
                 </v-toolbar-title>

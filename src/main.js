@@ -24,7 +24,7 @@ Vue.config.productionTip = false
 new Vue({
   render: h => h(App),
   router,
-  sdk: sdk({ server: 'wallet.bismuthplatform.de', port: 8155 }),
+  sdk: sdk({ server: '192.99.34.19', port: 8155 }),
   components: { App },
   template: '<App/>'
 }).$mount('#app')

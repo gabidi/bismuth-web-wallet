@@ -55,10 +55,10 @@ export default {
       [difficulty, difficulty_dropped, time_to_generate, diff_previous_block, block_time, networkHashRate, diff_adjustment, blockHeight],
       ServerTimestamp ] = await (await this.$sdk).getStatus()
 
-    this.difficulty = difficulty;
-    this.nodeVersion = nodeVersion;
-    this.blockHeight = blockHeight;
-    this.networkHashRate = networkHashRate;
+    this.difficulty = difficulty
+    this.nodeVersion = nodeVersion
+    this.blockHeight = blockHeight
+    this.networkHashRate = networkHashRate
   },
   data: () => ({
     difficulty: null,

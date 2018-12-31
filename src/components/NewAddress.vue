@@ -142,7 +142,6 @@
                         </v-card-actions>
                     </v-card>
 
-
                 </v-stepper-content>
 
                 <v-stepper-content step="3">
@@ -181,13 +180,13 @@
 
                                 <v-btn
                                         color="primary"
-                                        @click="e1 = 1"
+                                        @click="exportKeys"
                                         :disabled="generatingKeys"
                                 >
                                     Save to File
                                 </v-btn>
 
-                                <slot name="finalAction" :addressKeys="addressKeys">
+                                <slot name="finalAction" :addressKeys="addressKeys" :keysHaveBeenSaved="keysHaveBeenSaved">
                                 </slot>
                             </v-card-actions>
                         </v-card>
@@ -199,97 +198,107 @@
 </template>
 
 <script>
-    import {seed, entropy, generate} from 'bismuth-js-crypto'
+import { seed, entropy, generate } from 'bismuth-js-crypto'
+import bismuthHelpers from '../models/bismuthMixins'
 
-    export default {
+export default {
 
-        name: 'NewAddress',
-        components: {},
-        mixins: [],
-        props: ['resetToggle'],
-        mounted() {
-        },
-        data() {
-            return {
-                e1: 1,
-                entropyStarted: false,
-                entropyProgress: '0',
-                entropy: null,
-                twelveWordSeed: '',
-                mnemonicDisplayEnabled: false,
-                password: '',
-                passwordShow: false,
-                passwordRules: {
-                    required: value => !!value || 'Required.',
-                    min: v => v.length >= 8 || 'Min 8 characters'
-                },
-                addressKeys: {},
-                generatingKeys: false
-            }
-        },
-        filters: {},
-        computed: {
-            entropyDone() {
-                return this.entropyStarted && this.entropyProgress === '100%'
-            },
-            entropyProgressInt() {
-                if (!this.entropyProgress || this.entropyProgress.length < 1) {
-                    return null
-                }
-                return parseInt(this.entropyProgress.slice(0, -1))
-            }
-        },
-        watch: {
-            resetToggle() {
-                Object.assign(this.$data, this.$options.data.apply(this))
-            }
-        },
-        methods: {
-            stepGenSeed() {
-                this.makeMnemonicFromEntropySha()
-                if (this.e1 < 2) this.e1 = 2
-            },
-            async stepGenKeys() {
-                this.e1 = 3
-                this.generatingKeys = true
-                this.$nextTick(async () => {
-                    await this.makeKeysFromMneomic()
-                    this.generatingKeys = false
-                })
-            },
-            startEntropy() {
-                this.entropy = entropy()
-                this.entropyStarted = true
-            },
-            makeEntropy(e) {
-                if (!this.entropyStarted || !this.entropy) {
-                    return
-                }
-                this.entropy.entropyFromCoordinates(e)
-                this.entropyProgress = this.entropy.getSeedingPercent()
-            },
-            makeMnemonicFromEntropySha() {
-                if (!this.entropy || !this.entropy.seedingDone()) {
-                    console.error('Seeding isn done,buggingout')
-                    return
-                }
-                this.twelveWordSeed = seed.makeMnemonicFromEntropySha(this.entropy.getPoolSha256())
-            },
-            async makeKeysFromMneomic() {
-                if (!this.twelveWordSeed && !this.password) {
-                    console.error('Twelve words not detected !')
-                    return
-                }
-                const prng = seed.makeSeededPrngFromMneomic(this.twelveWordSeed, this.password)
-                const {generateKeys} = generate({prng})
-                const {privateKey, publicKey, address} = await generateKeys()
-                this.$set(this.addressKeys, 'publicKey', publicKey)
-                this.$set(this.addressKeys, 'privateKey', privateKey)
-                this.$set(this.addressKeys, 'address', address)
-            }
-
-        }
+  name: 'NewAddress',
+  components: {},
+  mixins: [bismuthHelpers],
+  props: ['resetToggle'],
+  mounted () {
+  },
+  data () {
+    return {
+      e1: 1,
+      entropyStarted: false,
+      entropyProgress: '0',
+      entropy: null,
+      twelveWordSeed: '',
+      mnemonicDisplayEnabled: false,
+      password: '',
+      passwordShow: false,
+      passwordRules: {
+        required: value => !!value || 'Required.',
+        min: v => v.length >= 8 || 'Min 8 characters'
+      },
+      addressKeys: {},
+      generatingKeys: false,
+      keysHaveBeenSaved: false
     }
+  },
+  filters: {},
+  computed: {
+    entropyDone () {
+      return this.entropyStarted && this.entropyProgress === '100%'
+    },
+    entropyProgressInt () {
+      if (!this.entropyProgress || this.entropyProgress.length < 1) {
+        return null
+      }
+      return parseInt(this.entropyProgress.slice(0, -1))
+    }
+  },
+  watch: {
+    resetToggle () {
+      Object.assign(this.$data, this.$options.data.apply(this))
+    }
+  },
+  methods: {
+    exportKeys () {
+      this.exportToFile({
+        PrivateKey: this.addressKeys.privateKey,
+        PublicKey: this.addressKeys.publicKey,
+        Address: this.addressKeys.address
+      }, `${this.addressKeys.address}-keys.json`)
+      this.keysHaveBeenSaved = true
+    },
+    stepGenSeed () {
+      this.makeMnemonicFromEntropySha()
+      if (this.e1 < 2) this.e1 = 2
+    },
+    async stepGenKeys () {
+      this.e1 = 3
+      this.generatingKeys = true
+      this.$nextTick(async () => {
+        await this.makeKeysFromMneomic()
+        this.generatingKeys = false
+      })
+    },
+    startEntropy () {
+      this.entropy = entropy()
+      this.entropyStarted = true
+    },
+    makeEntropy (e) {
+      if (!this.entropyStarted || !this.entropy) {
+        return
+      }
+      this.entropy.entropyFromCoordinates(e)
+      this.entropyProgress = this.entropy.getSeedingPercent()
+    },
+    makeMnemonicFromEntropySha () {
+      if (!this.entropy || !this.entropy.seedingDone()) {
+        console.error('Seeding isn done,buggingout')
+        return
+      }
+      this.twelveWordSeed = seed.makeMnemonicFromEntropySha(this.entropy.getPoolSha256())
+    },
+    async makeKeysFromMneomic () {
+      if (!this.twelveWordSeed && !this.password) {
+        console.error('Twelve words not detected !')
+        return
+      }
+      const prng = seed.makeSeededPrngFromMneomic(this.twelveWordSeed, this.password)
+      const { generateKeys } = generate({ prng })
+      const { privateKey, publicKey, address } = await generateKeys()
+      this.$set(this.addressKeys, 'publicKey', publicKey)
+      this.$set(this.addressKeys, 'privateKey', privateKey)
+      this.$set(this.addressKeys, 'address', address)
+    }
+
+  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

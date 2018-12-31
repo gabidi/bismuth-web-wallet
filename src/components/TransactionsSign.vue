@@ -4,12 +4,9 @@
             <v-card-title>
                 <span class="headline">Send from Address: {{address}}</span>
             </v-card-title>
-            <v-container
-                    fluid
-                    grid-list-lg
-            >
+            <v-card-text>
                 <v-layout row wrap>
-                    <template v-if="!signedTxn && !txnSent">
+                    <template v-if="!signedTxn.length && !txnSent">
                         <v-flex xs12>
                             <v-text-field v-model="txnData.amount"
                                           placeholder="enter amount"
@@ -25,35 +22,30 @@
                             ></v-text-field>
                         </v-flex>
                     </template>
-                    <template v-if="signedTxn">
-                        <v-text-field
-                                label="Transaction Signature"
-                                :value="signedTxn"
-                                :readonly="true"
-                                rows="5"
-                        >
-
-                        </v-text-field>
+                    <template v-if="signedTxn.length">
+                        {{signedTxn}}
                     </template>
+
                     <template v-if="txnSent">
                         <slot name="txnSentAction"
                               :txnSentResult="txnSentResult"
                               :amount="txnData.amount"
                               :recipient="txnData.recipient"
+                              :txnSentResultSuccess="txnSentResultSuccess"
                         >
                             <code>{{txnSentResult}}</code>
                         </slot>
                     </template>
                 </v-layout>
-            </v-container>
+            </v-card-text>
             <v-card-actions>
-                <template v-if="!signedTxn && !txnSent">
+                <template v-if="!signedTxn.length && !txnSent">
                     <v-btn
                             :disabled="false"
                             @click="sign({amount:txnData.amount,address,recipient:txnData.recipient})">Sign Txn
                     </v-btn>
                 </template>
-                <template v-if="signedTxn">
+                <template v-if="signedTxn.length">
                     <v-btn @click="confirmDialog=true">Send Transaction</v-btn>
                 </template>
             </v-card-actions>
@@ -122,7 +114,7 @@ import { sign } from 'bismuth-js-crypto'
 
 export default {
   name: 'TransactionsSign',
-  props: ['address', 'publicKey', 'privateKey', 'resetToggle'],
+  props: ['address', 'destination', 'publicKey', 'privateKey', 'resetToggle', 'maxSendAmount'],
   mixins: [bismuthHelpers],
   async mounted () {
   },
@@ -139,11 +131,11 @@ export default {
       },
       txnData: {
         amount: 0.0,
-        recipient: '',
+        recipient: this.destination || '',
         operation: null,
         openfield: null
       },
-      signedTxn: null,
+      signedTxn: [],
       confirmDialog: false,
       confirmSend: false,
       sendingTxn: false,
@@ -152,7 +144,14 @@ export default {
     }
   },
   filters: {},
-  computed: {},
+  computed: {
+    txnSentResultSuccess () {
+      if (!this.txnSentResult || !this.txnSentResult.length || this.txnSentResult.length < 3) {
+        return false
+      }
+      return this.txnSentResult[3] === 'Success'
+    }
+  },
   watch: {
     resetToggle () {
       Object.assign(this.$data, this.$options.data.apply(this))
@@ -163,8 +162,8 @@ export default {
       timestamp = Date.now() / 1000,
       address = this.address,
       recipient, amount,
-      operation = null,
-      openfield = null
+      operation = '',
+      openfield = ''
     } = {}) {
       const base64SignedTxn = sign.getSignedTxnBase64({
         formatedTxnString: sign.formatTxn({
@@ -178,7 +177,16 @@ export default {
         pemPublicKey: this.publicKey,
         pemPrivateKey: this.privateKey
       })
-      this.signedTxn = base64SignedTxn
+      this.signedTxn = [
+        timestamp.toFixed(2).toString(),
+        address,
+        recipient,
+        parseFloat(amount).toFixed(8).toString(),
+        base64SignedTxn,
+        btoa(this.publicKey),
+        operation,
+        openfield
+      ]
     },
     async confirmTxn () {
       this.confirmSend = true
@@ -194,6 +202,7 @@ export default {
       }
       this.sendingTxn = true
       try {
+        console.log('Sending signed', this.signedTxn)
         const txnResult = await (await this.$sdk).insertMemPoolTxn(this.signedTxn)
         this.txnSent = true
         this.txnSentResult = txnResult
