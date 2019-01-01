@@ -17,6 +17,15 @@
                     <span class="title" color="deep-purple accent-4">Bismuth Apps - Alpha  - DO NOT USE.</span>
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
+                <v-icon small color="green">
+                    fa-link
+                </v-icon>
+                <span class="caption" v-if="difficulty">
+                    NodeVersion: {{nodeVersion}}
+                    BlockNumber : {{blockHeight}} ,
+                    MemPool: , Difficulty: {{difficulty}} ,
+                    Network HashRate : {{networkHashRate}} </span>
+
             </v-toolbar>
             <v-content>
                 <router-view/>
@@ -28,17 +37,28 @@
 <script>
 export default {
   name: 'App',
+  mounted: async function () {
+    let [
+      Address,
+      NodesCount,
+      NodesList,
+      ThreadsCount,
+      Uptime,
+      PeersConsensus,
+      PeersConsensusPct,
+      nodeVersion,
+      [difficulty, difficulty_dropped, time_to_generate, diff_previous_block, block_time, networkHashRate, diff_adjustment, blockHeight],
+      ServerTimestamp ] = await (await this.$sdk).getStatus()
+
+    this.difficulty = difficulty
+    this.nodeVersion = nodeVersion
+    this.blockHeight = blockHeight
+    this.networkHashRate = networkHashRate
+  },
   data: () => ({
-    drawer: false,
-    items: [
-      {icon: 'subscriptions', text: 'Address', link: 'address'},
-      {icon: 'history', text: 'Transaction History'}
-    ],
-    addressBook: [
-      {picture: 28, text: 'John'},
-      {picture: 38, text: 'Sarah'},
-      {picture: 78, text: 'Kim'}
-    ]
+    difficulty: null,
+    nodeVersion: null
+
   }),
   props: {
     source: String

@@ -23,21 +23,6 @@ export default new Router({
     },
     {
       path: '/',
-      name: 'Landing',
-      component: Landing
-    },
-    {
-      path: '/address/create/',
-      name: 'NewAddress',
-      props: route => {
-        return {
-
-        }
-      },
-      component: NewAddress
-    },
-    {
-      path: '/Address/:addressId?',
       name: 'AddressBook',
       props: route => {
         return {

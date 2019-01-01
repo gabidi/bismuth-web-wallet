@@ -77,7 +77,14 @@ export default {
           }
 
           try {
-            const { PrivateKey, PublicKey, Address } = JSON.parse(derFileContents)
+            // const fields = { privateKey: ['Private Key', 'PrivateKey'], publicKey: ['Public Key', 'PublicKey'] }
+            const derFile = JSON.parse(derFileContents)
+
+            // @Todo discuss python naming convention for json.
+            const { Address } = derFile
+            const PrivateKey = derFile['Private Key'] || derFile['PrivateKey']
+            const PublicKey = derFile['Public Key'] || derFile['PublicKey']
+
             if (!PrivateKey || !PublicKey || !Address) {
               this.invalidDerFile = true
               return
