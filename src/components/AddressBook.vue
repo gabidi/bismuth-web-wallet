@@ -159,120 +159,120 @@
 </template>
 
 <script>
-    import Address from '@/components/Address'
-    import NewAddress from '@/components/NewAddress'
-    import ImportDer from '@/components/ImportDer'
-    import TransactionsSign from '@/components/TransactionsSign'
-    import moment from 'moment'
+import Address from '@/components/Address'
+import NewAddress from '@/components/NewAddress'
+import ImportDer from '@/components/ImportDer'
+import TransactionsSign from '@/components/TransactionsSign'
+import moment from 'moment'
 
-    export default {
-        name: 'AddressBook',
-        components: {Address, NewAddress, ImportDer, TransactionsSign},
-        mixins: [],
-        data() {
-            return {
-                addressList: [{address: null, autoFetch: false}],
-                importDialog: false,
-                createDialog: false,
-                signTxn: false,
-                memPoolInterval: null,
-                memPool: []
-            }
-        },
-        mounted() {
-            try {
-                const addressList = JSON.parse(window.localStorage.getItem('bismuthAddressBook'))
-                if (addressList && addressList.length) {
-                    this.addressList.splice(0, this.addressList.length, ...addressList)
-                }
-            } catch (err) {
-                // Clean storage if corrupted
-                console.error('Error parsing addressList', err)
-                localStorage.removeItem('bismuthAddressBook')
-            }
-
-            this.memPoolInterval = setInterval(async () => {
-                const mempool = await (await this.$sdk).getMempoolTxns()
-                this.memPool = mempool
-            }, 10000)
-        },
-        beforeDestroy() {
-            clearInterval(this.memPoolInterval)
-        },
-        computed: {
-            addressbookMempoolTxns() {
-                if (!this.memPool.length) {
-                    return []
-                }
-                return this.memPool.map(([
-                                             timestamp,
-                                             memPoolAddress,
-                                             memPoolrecipient,
-                                             amount,
-                                             signature
-                                         ]) => {
-                    const {address} = this.addressList.find(({address}) => address === memPoolAddress || address === memPoolrecipient) || {address: null}
-                    if (address) {
-                        return {
-                            timestamp: parseInt(timestamp),
-                            timestampMoment: moment.unix(parseInt(timestamp)),
-                            address,
-                            mempoolAddressStatus: (address === memPoolAddress) ? 'outgoing' : 'incoming',
-                            memPoolAddress,
-                            memPoolrecipient,
-                            amount,
-                            signature
-                        }
-                    }
-                }).filter(x => !!x)
-            }
-        },
-        provide() {
-            return {
-                // addAddress: this.addAddress,
-                // removeAddress: this.removeAddress
-            }
-        },
-        watch: {
-            addressList(o, n) {
-                localStorage.setItem('bismuthAddressBook',
-                    // Save address only, no keys
-                    JSON.stringify(this.addressList.map(({address, autoFetch}) => ({address, autoFetch})))
-                )
-            },
-            addressbookMempoolTxns(v) {
-
-            }
-        },
-        methods: {
-            toggleCreateNewDialog(value = false) {
-                this.createDialog = value
-            },
-
-            addAddress({address, publicKey = null, privateKey = null, autoFetch = false, signTxnModal = false, memPoolStatus = null} = {}) {
-                const addressIndex = this.addressList.findIndex(x => x.address === address)
-                // If address is already in list ignore unless adding keys
-                if (addressIndex > -1) {
-                    if (!publicKey || !privateKey) {
-                        return
-                    }
-                    this.addressList.splice(addressIndex, 1, {
-                        address,
-                        publicKey,
-                        privateKey,
-                        autoFetch,
-                        signTxnModal,
-                        memPoolStatus
-                    })
-                } else {
-                    this.addressList.push({address, publicKey, privateKey, autoFetch, signTxnModal, memPoolStatus})
-                }
-            },
-            removeAddress(index) {
-                this.addressList.splice(index, 1)
-            }
-        }
+export default {
+  name: 'AddressBook',
+  components: { Address, NewAddress, ImportDer, TransactionsSign },
+  mixins: [],
+  data () {
+    return {
+      addressList: [{ address: null, autoFetch: false }],
+      importDialog: false,
+      createDialog: false,
+      signTxn: false,
+      memPoolInterval: null,
+      memPool: []
     }
+  },
+  mounted () {
+    try {
+      const addressList = JSON.parse(window.localStorage.getItem('bismuthAddressBook'))
+      if (addressList && addressList.length) {
+        this.addressList.splice(0, this.addressList.length, ...addressList)
+      }
+    } catch (err) {
+      // Clean storage if corrupted
+      console.error('Error parsing addressList', err)
+      localStorage.removeItem('bismuthAddressBook')
+    }
+
+    this.memPoolInterval = setInterval(async () => {
+      const mempool = await (await this.$sdk).getMempoolTxns()
+      this.memPool = mempool
+    }, 10000)
+  },
+  beforeDestroy () {
+    clearInterval(this.memPoolInterval)
+  },
+  computed: {
+    addressbookMempoolTxns () {
+      if (!this.memPool.length) {
+        return []
+      }
+      return this.memPool.map(([
+        timestamp,
+        memPoolAddress,
+        memPoolrecipient,
+        amount,
+        signature
+      ]) => {
+        const { address } = this.addressList.find(({ address }) => address === memPoolAddress || address === memPoolrecipient) || { address: null }
+        if (address) {
+          return {
+            timestamp: parseInt(timestamp),
+            timestampMoment: moment.unix(parseInt(timestamp)),
+            address,
+            mempoolAddressStatus: (address === memPoolAddress) ? 'outgoing' : 'incoming',
+            memPoolAddress,
+            memPoolrecipient,
+            amount,
+            signature
+          }
+        }
+      }).filter(x => !!x)
+    }
+  },
+  provide () {
+    return {
+      // addAddress: this.addAddress,
+      // removeAddress: this.removeAddress
+    }
+  },
+  watch: {
+    addressList (o, n) {
+      localStorage.setItem('bismuthAddressBook',
+        // Save address only, no keys
+        JSON.stringify(this.addressList.map(({ address, autoFetch }) => ({ address, autoFetch })))
+      )
+    },
+    addressbookMempoolTxns (v) {
+
+    }
+  },
+  methods: {
+    toggleCreateNewDialog (value = false) {
+      this.createDialog = value
+    },
+
+    addAddress ({ address, publicKey = null, privateKey = null, autoFetch = false, signTxnModal = false, memPoolStatus = null } = {}) {
+      const addressIndex = this.addressList.findIndex(x => x.address === address)
+      // If address is already in list ignore unless adding keys
+      if (addressIndex > -1) {
+        if (!publicKey || !privateKey) {
+          return
+        }
+        this.addressList.splice(addressIndex, 1, {
+          address,
+          publicKey,
+          privateKey,
+          autoFetch,
+          signTxnModal,
+          memPoolStatus
+        })
+      } else {
+        this.addressList.push({ address, publicKey, privateKey, autoFetch, signTxnModal, memPoolStatus })
+      }
+    },
+    removeAddress (index) {
+      this.addressList.splice(index, 1)
+    }
+  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
