@@ -290,8 +290,8 @@ export default {
         return
       }
       const prng = seed.makeSeededPrngFromMneomic(this.twelveWordSeed, this.password)
-      const { generateKeys } = generate({ prng })
-      const { privateKey, publicKey, address } = await generateKeys()
+      const { generateKeysInSteps } = generate({ prng })
+      const { privateKey, publicKey, address } = await generateKeysInSteps()
       this.$set(this.addressKeys, 'publicKey', publicKey)
       this.$set(this.addressKeys, 'privateKey', privateKey)
       this.$set(this.addressKeys, 'address', address)
