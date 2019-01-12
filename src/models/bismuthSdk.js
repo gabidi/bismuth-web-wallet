@@ -13,7 +13,7 @@ Vue.mixin({
 })
 
 export default ({server, port} = {}) => {
-  const socket = new WebSocket(`ws://${server}:${port}/web-socket/`)
+  const socket = new WebSocket(`${ webpackHotUpdate ? 'ws' : 'wss'}://${server}:${port}/web-socket/`)
   // Stub native stuff for API
 
   socket['once'] = function (event, cb) {
