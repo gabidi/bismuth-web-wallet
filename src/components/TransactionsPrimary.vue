@@ -35,7 +35,9 @@
                                     </div>
                                 </v-card-title>
                                 <v-card-actions>
+<!--
                                     <v-btn>{{ txn.txnType === 'message' ? 'Reply' : 'Send to Address'}}</v-btn>
+-->
                                     <v-btn :to="{path: `/txns/${txn.txnId}`}">details</v-btn>
                                 </v-card-actions>
                             </v-flex>

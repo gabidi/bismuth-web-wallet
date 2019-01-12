@@ -129,30 +129,32 @@
                     </v-flex>
                 </v-layout>
             </v-flex>
+
+
+            <v-dialog v-model="createDialog" fullscreen transition="dialog-bottom-transition" lazy>
+                <NewAddress :resetToggle="createDialog">
+                    <template slot="cancel">
+                        <v-btn @click="createDialog = false">Cancel and Close</v-btn>
+                    </template>
+                    <template slot="finalAction" slot-scope="{addressKeys,keysHaveBeenSaved}">
+                        <v-btn @click="addAddress(addressKeys)">Add to AddressBook</v-btn>
+                        <v-btn :disabled="!keysHaveBeenSaved" @click="createDialog = false">
+                            {{(!keysHaveBeenSaved) ? 'Save your keys please' : 'Close'}}
+                        </v-btn>
+
+                    </template>
+                </NewAddress>
+            </v-dialog>
+            <v-dialog v-model="importDialog" transition="dialog-bottom-transition">
+                <ImportDer :resetToggle="importDialog">
+                    <template slot="derLoadedActions" slot-scope="{privateKey,publicKey,address}">
+                        <v-btn @click="()=>addAddress({privateKey,publicKey,address,autoFetch:true})">Add to AddressBook
+                        </v-btn>
+                    </template>
+                </ImportDer>
+            </v-dialog>
         </v-layout>
 
-        <v-dialog v-model="createDialog" fullscreen transition="dialog-bottom-transition">
-            <NewAddress :resetToggle="createDialog">
-                <template slot="cancel">
-                    <v-btn @click="createDialog = false">Cancel and Close</v-btn>
-                </template>
-                <template slot="finalAction" slot-scope="{addressKeys,keysHaveBeenSaved}">
-                    <v-btn @click="addAddress(addressKeys)">Add to AddressBook</v-btn>
-                    <v-btn :disabled="!keysHaveBeenSaved" @click="createDialog = false">
-                        {{(!keysHaveBeenSaved) ? 'Save your keys please' : 'Close'}}
-                    </v-btn>
-
-                </template>
-            </NewAddress>
-        </v-dialog>
-        <v-dialog v-model="importDialog" transition="dialog-bottom-transition">
-            <ImportDer :resetToggle="importDialog">
-                <template slot="derLoadedActions" slot-scope="{privateKey,publicKey,address}">
-                    <v-btn @click="()=>addAddress({privateKey,publicKey,address,autoFetch:true})">Add to AddressBook
-                    </v-btn>
-                </template>
-            </ImportDer>
-        </v-dialog>
 
     </div>
 
