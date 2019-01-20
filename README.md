@@ -1,6 +1,7 @@
-# bismuth-wallet
+# Bismuth Blockchain webwallet
+A web wallet for the Bismuth blockchain that runs purely in your browser. No need to run a python node or any other thing to get it working :)
 
-## Features
+## Currently Features
 ### Look up an addresses transcactions and history
 ![Lookup an Address](https://media.giphy.com/media/1wqpNauCCRgkRqgERn/giphy.gif)
 
@@ -10,12 +11,20 @@
 ### Importing DER files from python node
 ![Importing DER](https://media.giphy.com/media/de00uNCKh0Cuq5jg0n/giphy.gif)
 
+### Signing and Sending basic (BIS) transactions
+![Signing Transactions](https://media.giphy.com/media/WdrCa4ep5L24TKwIjq/giphy.gif)
+
 ## Roadmap
 - Better error handling
 - URL sharing
 - Address Alias + Tokens
 - Regenerate wallet + keys from 12 words seed
 
+
+## FAQ
+- I get stuck and loading
+  - Wait 15 seconds and try your request again, Bismuth Websocket servers are funny..
+  
 ## Contribution and Project setup
 ```
 Clone repo then:
