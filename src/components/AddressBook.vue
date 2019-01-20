@@ -2,6 +2,7 @@
     <div id="addressBook">
         <v-layout row wrap>
             <v-flex xs12>
+		    <!-- @todo HERE: Add linear progress bar + watch and refresh addresses on change from true to false-->
                 <v-alert type="info" :value="addressbookMempoolTxns.length" transition="scale-transition">
                     <span class="headline">
                         Address book addresses have {{addressbookMempoolTxns.length}} pending transactions (in mempool)

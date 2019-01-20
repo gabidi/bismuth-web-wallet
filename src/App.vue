@@ -12,7 +12,10 @@
                     app
             >
                 <v-toolbar-side-icon>
-                    <v-icon><img src="assets/bismuth_logo_128.png"></v-icon></v-toolbar-side-icon>
+			<v-avatar :tile="tile" :size="32">
+				<img src="./assets/64x64.png" alt="Bismuth Logo">
+        		</v-avatar>	
+		</v-toolbar-side-icon>
                 <v-toolbar-title class="mr-5 align-center">
                     <span class="title" color="deep-purple accent-4">Bismuth Apps - Alpha  - DO NOT USE.</span>
                 </v-toolbar-title>
