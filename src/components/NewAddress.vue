@@ -387,8 +387,8 @@ export default {
   methods: {
     exportKeys () {
       this.exportToFile({
-        PrivateKey: this.addressKeys.privateKey,
-        PublicKey: this.addressKeys.publicKey,
+        "Private Key": this.addressKeys.privateKey,
+        "Public Key": this.addressKeys.publicKey,
         Address: this.addressKeys.address
       }, `${this.addressKeys.address}-keys.json`)
       this.keysHaveBeenSaved = true

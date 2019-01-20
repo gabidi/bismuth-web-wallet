@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import {BismuthWSSdk} from 'bismuth-js-sdk'
+import { BismuthWSSdk } from 'bismuth-js-sdk'
 
 Vue.mixin({
   beforeCreate () {
@@ -12,8 +12,8 @@ Vue.mixin({
   }
 })
 
-export default ({server, port} = {}) => {
-  const socket = new WebSocket(`${ webpackHotUpdate ? 'ws' : 'wss'}://${server}:${port}/web-socket/`)
+export default ({ server } = {}) => {
+  const socket = new WebSocket(server)
   // Stub native stuff for API
 
   socket['once'] = function (event, cb) {
@@ -25,5 +25,5 @@ export default ({server, port} = {}) => {
   }
   return new Promise((resolve, reject) => {
     socket.onopen = resolve
-  }).then(() => new BismuthWSSdk({verbose: true, socket}))
+  }).then(() => new BismuthWSSdk({ verbose: true, socket }))
 }

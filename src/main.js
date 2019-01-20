@@ -19,12 +19,15 @@ Vue.use(Vuex)
 Vue.use(Vuetify)
 Vue.use(VueNumeric)
 Vue.config.productionTip = false
+const server = `${
+  webpackHotUpdate ? 'ws' : 'wss'
+}://wallet.bismuthplatform.de:8155/web-socket`
 
 /* eslint-disable no-new */
 new Vue({
   render: h => h(App),
   router,
-  sdk: sdk({ server: 'wallet.bismuthplatform.de', port: 8155 }),
+  sdk: sdk({ server }),
   components: { App },
   template: '<App/>'
 }).$mount('#app')
