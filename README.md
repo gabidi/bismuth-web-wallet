@@ -1,7 +1,13 @@
 # bismuth-wallet
 
-## Project setup
+## Generate new keys and Address
+![][https://media.giphy.com/media/8vmVXguBdlnI3hVL5w/giphy.gif]
+
+
+
+## Contribution and Project setup
 ```
+Clone repo then:
 npm install
 ```
 
