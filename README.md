@@ -1,8 +1,7 @@
 # bismuth-wallet
 
 ## Generate new keys and Address
-![][https://media.giphy.com/media/8vmVXguBdlnI3hVL5w/giphy.gif]
-
+![Creating a new Address](https://media.giphy.com/media/8vmVXguBdlnI3hVL5w/giphy.gif)
 
 
 ## Contribution and Project setup
