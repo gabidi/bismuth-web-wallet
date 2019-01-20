@@ -19,9 +19,9 @@ Vue.use(Vuex)
 Vue.use(Vuetify)
 Vue.use(VueNumeric)
 Vue.config.productionTip = false
-// const server = `${ webpackHotUpdate ? 'ws' : 'wss' }://wallet.bismuthplatform.de:8155/web-socket/`
-const server = `ws://homebase:8089`
-
+const server = `wss://ws.sifir.io/bismuth-wallet`;
+// const server = 'ws://localhost:8089'
+//
 /* eslint-disable no-new */
 new Vue({
   render: h => h(App),

@@ -2,7 +2,7 @@
     <div id="addressBook">
         <v-layout row wrap>
             <v-flex xs12>
-		    <!-- @todo HERE: Add linear progress bar + watch and refresh addresses on change from true to false-->
+                <!-- @todo HERE: Add linear progress bar + watch and refresh addresses on change from true to false-->
                 <v-alert type="info" :value="addressbookMempoolTxns.length" transition="scale-transition">
                     <span class="headline">
                         Address book addresses have {{addressbookMempoolTxns.length}} pending transactions (in mempool)
@@ -131,31 +131,32 @@
                 </v-layout>
             </v-flex>
 
-
             <v-dialog v-model="createDialog" fullscreen transition="dialog-bottom-transition" lazy>
                 <NewAddress :resetToggle="createDialog">
                     <template slot="cancel">
                         <v-btn @click="createDialog = false">Cancel and Close</v-btn>
                     </template>
                     <template slot="finalAction" slot-scope="{addressKeys,keysHaveBeenSaved}">
-                        <v-btn @click="addAddress(addressKeys)">Add to AddressBook</v-btn>
-                        <v-btn :disabled="!keysHaveBeenSaved" @click="createDialog = false">
-                            {{(!keysHaveBeenSaved) ? 'Save your keys please' : 'Close'}}
+                        <v-btn
+                                :color="keysHaveBeenSaved ? 'primary' : ''"
+                                :disabled="!keysHaveBeenSaved"
+                                @click="()=> addAddressAndCloseCreateDialog(addressKeys)"
+                        >
+                            {{(!keysHaveBeenSaved) ? 'Save your keys please' : 'Add to AddressBook & Close'}}
                         </v-btn>
-
                     </template>
                 </NewAddress>
             </v-dialog>
             <v-dialog v-model="importDialog" transition="dialog-bottom-transition">
                 <ImportDer :resetToggle="importDialog">
                     <template slot="derLoadedActions" slot-scope="{privateKey,publicKey,address}">
-                        <v-btn @click="()=>addAddress({privateKey,publicKey,address,autoFetch:true})">Add to AddressBook
+                        <v-btn @click="()=>addAddressAndCloseImportDialog({privateKey,publicKey,address,autoFetch:true})">
+                            Add to AddressBook & Close
                         </v-btn>
                     </template>
                 </ImportDer>
             </v-dialog>
         </v-layout>
-
 
     </div>
 
@@ -251,7 +252,6 @@ export default {
     toggleCreateNewDialog (value = false) {
       this.createDialog = value
     },
-
     addAddress ({ address, publicKey = null, privateKey = null, autoFetch = false, signTxnModal = false, memPoolStatus = null } = {}) {
       const addressIndex = this.addressList.findIndex(x => x.address === address)
       // If address is already in list ignore unless adding keys
@@ -270,6 +270,14 @@ export default {
       } else {
         this.addressList.push({ address, publicKey, privateKey, autoFetch, signTxnModal, memPoolStatus })
       }
+    },
+    addAddressAndCloseImportDialog (address) {
+      this.addAddress(address)
+      this.importDialog = false
+    },
+    addAddressAndCloseCreateDialog (address) {
+      this.addAddress(address)
+      this.createDialog = false
     },
     removeAddress (index) {
       this.addressList.splice(index, 1)

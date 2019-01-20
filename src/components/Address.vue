@@ -336,161 +336,161 @@
 </template>
 
 <script>
-    /**
+/**
      * @todo refactors Address methods to mixin
      */
 
-    import TranscationsPrimary from '@/components/TransactionsPrimary'
-    import bismuthHelpers from '../models/bismuthMixins'
+import TranscationsPrimary from '@/components/TransactionsPrimary'
+import bismuthHelpers from '../models/bismuthMixins'
 
-    export default {
-        name: 'Address',
-        components: {TranscationsPrimary},
-        mixins: [bismuthHelpers],
+export default {
+  name: 'Address',
+  components: { TranscationsPrimary },
+  mixins: [bismuthHelpers],
 
-        props: ['addressId', 'autoFetch', 'publicKey', 'privateKey'],
-        async mounted() {
-            if (this.autoFetch && this.addressIsValid) {
-                await this.getAdddresAndTxns()
-            }
-        },
-        data() {
-            return {
-                address: this.addressId || null,
-                isLoading: false,
-                rules: {
-                    length: len => v =>
-                        (v || '').length === len ||
+  props: ['addressId', 'autoFetch', 'publicKey', 'privateKey'],
+  async mounted () {
+    if (this.autoFetch && this.addressIsValid) {
+      await this.getAdddresAndTxns()
+    }
+  },
+  data () {
+    return {
+      address: this.addressId || null,
+      isLoading: false,
+      rules: {
+        length: len => v =>
+          (v || '').length === len ||
                         `Invalid character length, required ${len}`,
-                    address: v =>
-                        (v || '').match(/^[a-f0-9]{56}$/) ||
+        address: v =>
+          (v || '').match(/^[a-f0-9]{56}$/) ||
                         'Bismuth Address should be Alphanumeric and 56 chars long',
-                    required: v => !!v || 'This field is required'
-                },
-                addressBalance: {
-                    balance: null,
-                    totalDebits: null,
-                    totalCredits: null,
-                    totalFees: null,
-                    totalRewards: null,
-                    balanceNotInMempool: null
-                },
-                addressExtraInfo: {
-                    show: true
-                },
-                txnListLimit: 10,
-                txnListOffset: 0,
-                txnListShowFullAddress: false,
-                txnListFilters: [
-                    '{"type": "direction" , "value": "incoming"}',
-                    '{"type": "direction" , "value": "outgoing"}'
-                ],
-                addressTxnList: []
-            }
-        },
-        filters: {
-            firstLastFour(s) {
-                return `${s.slice(0, 4)} ... ${s.slice(-4)}`
-            }
-        },
-        computed: {
-            /**
+        required: v => !!v || 'This field is required'
+      },
+      addressBalance: {
+        balance: null,
+        totalDebits: null,
+        totalCredits: null,
+        totalFees: null,
+        totalRewards: null,
+        balanceNotInMempool: null
+      },
+      addressExtraInfo: {
+        show: true
+      },
+      txnListLimit: 10,
+      txnListOffset: 0,
+      txnListShowFullAddress: false,
+      txnListFilters: [
+        '{"type": "direction" , "value": "incoming"}',
+        '{"type": "direction" , "value": "outgoing"}'
+      ],
+      addressTxnList: []
+    }
+  },
+  filters: {
+    firstLastFour (s) {
+      return `${s.slice(0, 4)} ... ${s.slice(-4)}`
+    }
+  },
+  computed: {
+    /**
              * FIXME Quick hack for slot scope  on $parent data for databale
              */
-            showFullAddress() {
-                return this.txnListShowFullAddress
-            },
-            addressIsValid() {
-                return this.address && this.rules.address(this.address).length === 1
-            },
-            addressTxnListToDisplay() {
-                let txnsToShow = this.addressTxnList
+    showFullAddress () {
+      return this.txnListShowFullAddress
+    },
+    addressIsValid () {
+      return this.address && this.rules.address(this.address).length === 1
+    },
+    addressTxnListToDisplay () {
+      let txnsToShow = this.addressTxnList
 
-                if (this.txnListFilters.length) {
-                    const filters = this.txnListFilters.map(JSON.parse)
-                    txnsToShow = txnsToShow.filter(t =>
-                        // Using some for 'OR'
-                        filters.some(({type, value}) => t[type] === value)
-                    )
-                }
-                return txnsToShow
-            },
-            showLoadDialog() {
-                return this.isLoading
-            },
-            addressKeysLoaded() {
-                return !!(this.privateKey && this.publicKey)
-            }
-        },
-        watch: {
-            addressId: {
-                async handler(n, o) {
-                    if (n !== o) {
-                        this.address = n
-                    }
-                }
-            },
-            txnListLimit: {
-                async handler(n, o) {
-                    if (n !== o) {
-                        await this.getAddressTxns()
-                    }
-                }
-            }
-        },
-        methods: {
-            async getAddress() {
-                this.isLoading = true
-                try {
-                    const [
-                        balance,
-                        totalCredits,
-                        totalDebits,
-                        totalFees,
-                        totalRewards,
-                        balanceNotInMempool
-                    ] = (await (await this.$sdk).getAddressBalance(this.address)).map(
-                        parseFloat
-                    )
-
-                    this.addressBalance.balance = balance
-                    this.addressBalance.totalDebits = totalDebits
-                    this.addressBalance.totalCredits = totalCredits
-                    this.addressBalance.totalFees = totalFees
-                    this.addressBalance.totalRewards = totalRewards
-                    this.addressBalance.balanceNotInMempool = balanceNotInMempool
-                } catch (err) {
-
-                } finally {
-                    this.isLoading = false
-                }
-            },
-            goToTxnBeneficiaryAddress(address) {
-                this.$router.push({path: `${address}?autoFetch=true`})
-            },
-            async getAddressTxns() {
-                try {
-                    this.isLoading = true
-                    const addressTxnList = await (await this.$sdk).getAddressTxnList(
-                        this.address,
-                        this.txnListLimit
-                    )
-                    if (addressTxnList.length) {
-                        this.addressTxnList = addressTxnList.map(this.parseTxn)
-                    }
-                } catch (err) {
-                    console.error('getAddressTxns', {err})
-                } finally {
-                    this.isLoading = false
-                }
-            },
-            async getAdddresAndTxns() {
-                // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
-                await this.getAddress()
-                await this.getAddressTxns()
-            }
-        }
+      if (this.txnListFilters.length) {
+        const filters = this.txnListFilters.map(JSON.parse)
+        txnsToShow = txnsToShow.filter(t =>
+        // Using some for 'OR'
+          filters.some(({ type, value }) => t[type] === value)
+        )
+      }
+      return txnsToShow
+    },
+    showLoadDialog () {
+      return this.isLoading
+    },
+    addressKeysLoaded () {
+      return !!(this.privateKey && this.publicKey)
     }
+  },
+  watch: {
+    addressId: {
+      async handler (n, o) {
+        if (n !== o) {
+          this.address = n
+        }
+      }
+    },
+    txnListLimit: {
+      async handler (n, o) {
+        if (n !== o) {
+          await this.getAddressTxns()
+        }
+      }
+    }
+  },
+  methods: {
+    async getAddress () {
+      this.isLoading = true
+      try {
+        const [
+          balance,
+          totalCredits,
+          totalDebits,
+          totalFees,
+          totalRewards,
+          balanceNotInMempool
+        ] = (await (await this.$sdk).getAddressBalance(this.address)).map(
+          parseFloat
+        )
+
+        this.addressBalance.balance = balance
+        this.addressBalance.totalDebits = totalDebits
+        this.addressBalance.totalCredits = totalCredits
+        this.addressBalance.totalFees = totalFees
+        this.addressBalance.totalRewards = totalRewards
+        this.addressBalance.balanceNotInMempool = balanceNotInMempool
+      } catch (err) {
+        console.error('Error getting address balance', err)
+      } finally {
+        this.isLoading = false
+      }
+    },
+    goToTxnBeneficiaryAddress (address) {
+      this.$router.push({ path: `${address}?autoFetch=true` })
+    },
+    async getAddressTxns () {
+      try {
+        this.isLoading = true
+        const addressTxnList = await (await this.$sdk).getAddressTxnList(
+          this.address,
+          this.txnListLimit
+        )
+        if (addressTxnList.length) {
+          this.addressTxnList = addressTxnList.map(this.parseTxn)
+        }
+      } catch (err) {
+        console.error('Error gettting Txns', { err })
+      } finally {
+        this.isLoading = false
+      }
+    },
+    async getAdddresAndTxns () {
+      // FIXME the way we stub the socket for once makes it impossible to do parrallel calls ://
+      await this.getAddress()
+      await this.getAddressTxns()
+    }
+  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

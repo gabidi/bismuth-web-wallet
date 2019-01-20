@@ -221,10 +221,14 @@
                                                     <v-divider></v-divider>
                                                     <v-flex xs12>
                                                         <v-card>
-                                                            <v-card-title>Your Bismuth address:
-                                                                <code>{{addressKeys.address}}</code></v-card-title>
+                                                            <v-card-title class="title">
+                                                                <span class="title">
+                                                                Your Bismuth address:
+                                                                <code>{{addressKeys.address}}</code>
+                                                                    </span>
+                                                            </v-card-title>
                                                             <v-card-text>
-                                                                <v-layout>
+                                                                <v-layout v-if="showKeys">
                                                                     <v-flex xs6>
                                                                         <v-textarea
                                                                                 :value="addressKeys.privateKey"
@@ -248,12 +252,15 @@
                                                                 </v-layout>
                                                             </v-card-text>
                                                             <v-card-actions>
+                                                                <v-btn @click="showKeys = !showKeys">
+                                                                    {{ showKeys ? 'Hide' : 'Show'  }} RSA Keys
+                                                                </v-btn>
                                                                 <v-btn
-                                                                        color="primary"
+                                                                        :color="keysHaveBeenSaved ? '' : 'primary'"
                                                                         @click="exportKeys"
                                                                         :disabled="generatingKeys"
                                                                 >
-                                                                    Save to File
+                                                                    Save RSA Keys to PEM File
                                                                 </v-btn>
 
                                                                 <slot name="finalAction" :addressKeys="addressKeys"
@@ -349,7 +356,8 @@ const initialState = () => ({
   generatingKeys: false,
   keysHaveBeenSaved: false,
   showUserConfirmDialog: false,
-  showPassword: false
+  showPassword: false,
+  showKeys: false
 })
 export default {
 
@@ -387,8 +395,8 @@ export default {
   methods: {
     exportKeys () {
       this.exportToFile({
-        "Private Key": this.addressKeys.privateKey,
-        "Public Key": this.addressKeys.publicKey,
+        'Private Key': this.addressKeys.privateKey,
+        'Public Key': this.addressKeys.publicKey,
         Address: this.addressKeys.address
       }, `${this.addressKeys.address}-keys.json`)
       this.keysHaveBeenSaved = true

@@ -8,11 +8,12 @@
                 <v-layout row wrap>
                     <template v-if="!signedTxn.length && !txnSent">
                         <v-flex xs12>
-                            <v-text-field v-model="txnData.amount"
-                                          placeholder="enter amount"
-                                          type="number"
-                                          label="Amount of BIS to send"
-                            ></v-text-field>
+				 <v-text-field
+					 v-model="txnData.amount"
+					 placeholder="enter amount"
+					 type="number"
+					 label="Amount of BIS to send" >
+				 </v-text-field>
                         </v-flex>
                         <v-flex xs12>
                             <v-text-field v-model="txnData.recipient"
