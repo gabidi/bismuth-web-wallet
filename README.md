@@ -1,8 +1,20 @@
 # bismuth-wallet
 
-## Generate new keys and Address
+## Features
+### Look up an addresses transcactions and history
+![Lookup an Address](https://media.giphy.com/media/1wqpNauCCRgkRqgERn/giphy.gif)
+
+### Creating new Keys and Address in browser (no need for node running). Then export and save your key files :)
 ![Creating a new Address](https://media.giphy.com/media/8vmVXguBdlnI3hVL5w/giphy.gif)
 
+### Importing DER files from python node
+![Importing DER](https://media.giphy.com/media/de00uNCKh0Cuq5jg0n/giphy.gif)
+
+## Roadmap
+- Better error handling
+- URL sharing
+- Address Alias + Tokens
+- Regenerate wallet + keys from 12 words seed
 
 ## Contribution and Project setup
 ```
